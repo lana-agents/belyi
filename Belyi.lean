@@ -9,6 +9,7 @@ import Belyi.Dimension
 import Belyi.FunctionField
 import Belyi.P1
 import Belyi.P1.AffineChart
+import Belyi.P1.BaseChange
 import Belyi.P1.Points
 import Belyi.P1.Transcendental
 import Belyi.Polynomial.CritVal
