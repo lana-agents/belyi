@@ -15,6 +15,7 @@ import Belyi.P1
 import Belyi.P1.AffineChart
 import Belyi.P1.BaseChange
 import Belyi.P1.Points
+import Belyi.P1.PointsBaseChange
 import Belyi.P1.Transcendental
 import Belyi.Polynomial.CritVal
 import Belyi.Polynomial.Lambda
