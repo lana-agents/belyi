@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.Curve.B1
+import Belyi.Curve.B1Surjective
 import Belyi.KaehlerRank
 
 /-!
@@ -151,6 +152,31 @@ theorem isFinite_homOfFunctionField_of_isCurveOver {t : X.functionField}
     IsFinite (homOfFunctionField k X (valuationRing_stalk_of_isCurveOver k X) t) :=
   isFinite_homOfFunctionField k X (valuationRing_stalk_of_isCurveOver k X)
     (krullDimLE_one_stalk_of_isCurveOver k X) ht
+
+/-- **B1, surjectivity, unconditional.** For a curve `X` over a perfect field `k` and a
+transcendental `t ∈ K(X)`, the induced morphism `X ⟶ ℙ¹` is surjective.  The stalk
+hypotheses of `Belyi.surjective_homOfFunctionField` are supplied by
+`Belyi.valuationRing_stalk_of_isCurveOver` and `Belyi.krullDimLE_one_stalk_of_isCurveOver`,
+so no side hypotheses on the local rings remain. -/
+theorem surjective_homOfFunctionField_of_isCurveOver {t : X.functionField}
+    (ht : Transcendental k t) :
+    Function.Surjective
+      (homOfFunctionField k X (valuationRing_stalk_of_isCurveOver k X) t).base :=
+  surjective_homOfFunctionField k X (valuationRing_stalk_of_isCurveOver k X)
+    (krullDimLE_one_stalk_of_isCurveOver k X) ht
+
+/-- **B1, main theorem, unconditional.** For a curve `X` over a perfect field `k` and a
+transcendental `t ∈ K(X)`, the induced morphism `X ⟶ ℙ¹` is finite **and** surjective —
+every such curve admits a finite surjective morphism to `ℙ¹`.  This is the fully
+unconditional form of `Belyi.isFinite_and_surjective_homOfFunctionField`, with the stalk
+hypotheses discharged by issue #75. -/
+theorem isFinite_and_surjective_homOfFunctionField_of_isCurveOver {t : X.functionField}
+    (ht : Transcendental k t) :
+    IsFinite (homOfFunctionField k X (valuationRing_stalk_of_isCurveOver k X) t) ∧
+      Function.Surjective
+        (homOfFunctionField k X (valuationRing_stalk_of_isCurveOver k X) t).base :=
+  ⟨isFinite_homOfFunctionField_of_isCurveOver k X ht,
+    surjective_homOfFunctionField_of_isCurveOver k X ht⟩
 
 end Curve
 
