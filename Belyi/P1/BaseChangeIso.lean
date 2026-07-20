@@ -81,20 +81,51 @@ noncomputable def chartAlgHom (k : Type u) [CommRing k] (i : Fin 2) :
 
 /-! ### The chart map corresponds to `Polynomial.map` -/
 
+/-- Coefficient extension `MvPolynomial.map (algebraMap k₀ K)` commutes with evaluation `aeval`
+into a univariate polynomial ring, provided the evaluation points correspond under
+`Polynomial.map`. Both sides are ring homomorphisms out of `MvPolynomial σ k₀` which agree on
+constants and on the generators, so they coincide. -/
+lemma aeval_map_algebraMap_comm {σ : Type*} (v : σ → Polynomial K) (w : σ → Polynomial k₀)
+    (hvw : ∀ i, v i = Polynomial.map (algebraMap k₀ K) (w i)) (a : MvPolynomial σ k₀) :
+    aeval v (MvPolynomial.map (algebraMap k₀ K) a) =
+      Polynomial.map (algebraMap k₀ K) (aeval w a) := by
+  have h : ((aeval v : MvPolynomial σ K →ₐ[K] Polynomial K).toRingHom.comp
+        (MvPolynomial.map (algebraMap k₀ K))) =
+      (Polynomial.mapRingHom (algebraMap k₀ K)).comp
+        (aeval w : MvPolynomial σ k₀ →ₐ[k₀] Polynomial k₀).toRingHom :=
+    MvPolynomial.ringHom_ext (fun r => by simp) (fun i => by simp [hvw i])
+  exact DFunLike.congr_fun h a
+
 /-- Under the chart-coordinate isomorphisms `awayChartEquivOne` (`ChartCoord`), the base-change
 chart map `chartMap 1` corresponds to `Polynomial.map`. This is the naturality square underlying
 the chart pushout. -/
 lemma chartMap_naturality_one (q : Away (P1Grading k₀) (X 1)) :
     awayChartEquivOne K (chartMap k₀ K 1 q) =
       Polynomial.map (algebraMap k₀ K) (awayChartEquivOne k₀ q) := by
-  sorry
+  have hK : ∀ x : Away (P1Grading K) (X 1),
+      awayChartEquivOne K x = awayEval K Polynomial.X x := fun _ => rfl
+  have h0 : ∀ x : Away (P1Grading k₀) (X 1),
+      awayChartEquivOne k₀ x = awayEval k₀ Polynomial.X x := fun _ => rfl
+  obtain ⟨n, a, ha, rfl⟩ :=
+    HomogeneousLocalization.Away.mk_surjective (P1Grading k₀) (X_mem_P1Grading k₀ 1) q
+  rw [chartMap_mk, hK, h0, awayEval_mk, awayEval_mk]
+  exact aeval_map_algebraMap_comm k₀ K ![Polynomial.X, 1] ![Polynomial.X, 1]
+    (fun i => by fin_cases i <;> simp) a
 
 /-- Under `awayChartEquivZero`, the base-change chart map `chartMap 0` corresponds to
 `Polynomial.map`. -/
 lemma chartMap_naturality_zero (q : Away (P1Grading k₀) (X 0)) :
     awayChartEquivZero K (chartMap k₀ K 0 q) =
       Polynomial.map (algebraMap k₀ K) (awayChartEquivZero k₀ q) := by
-  sorry
+  have hK : ∀ x : Away (P1Grading K) (X 0),
+      awayChartEquivZero K x = awayEval0 K Polynomial.X x := fun _ => rfl
+  have h0 : ∀ x : Away (P1Grading k₀) (X 0),
+      awayChartEquivZero k₀ x = awayEval0 k₀ Polynomial.X x := fun _ => rfl
+  obtain ⟨n, a, ha, rfl⟩ :=
+    HomogeneousLocalization.Away.mk_surjective (P1Grading k₀) (X_mem_P1Grading k₀ 0) q
+  rw [chartMap_mk, hK, h0, awayEval0_mk, awayEval0_mk]
+  exact aeval_map_algebraMap_comm k₀ K ![1, Polynomial.X] ![1, Polynomial.X]
+    (fun i => by fin_cases i <;> simp) a
 
 /-! ### The chart pushout -/
 
@@ -104,7 +135,32 @@ lemma isPushout_chart_one :
       (CommRingCat.ofHom (chartAlgHom k₀ 1))
       (CommRingCat.ofHom (chartAlgHom K 1))
       (CommRingCat.ofHom (chartMap k₀ K 1)) := by
-  sorry
+  letI : Algebra (Polynomial k₀) (Polynomial K) := Polynomial.algebra k₀ K
+  haveI : IsScalarTower k₀ K (Polynomial K) := .of_algebraMap_eq fun _ => rfl
+  haveI : IsScalarTower k₀ (Polynomial k₀) (Polynomial K) :=
+    .of_algebraMap_eq fun x => by simp [Polynomial.algebraMap_def, Polynomial.coe_mapRingHom]
+  refine (CommRingCat.isPushout_of_isPushout k₀ K (Polynomial k₀) (Polynomial K)).of_iso
+    (Iso.refl _) (Iso.refl _)
+    (awayChartEquivOne k₀).symm.toRingEquiv.toCommRingCatIso
+    (awayChartEquivOne K).symm.toRingEquiv.toCommRingCatIso ?_ ?_ ?_ ?_
+  · simp
+  · refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+    simp only [RingEquiv.toCommRingCatIso_hom, CommRingCat.hom_comp, RingHom.coe_comp,
+      Function.comp_apply, CommRingCat.hom_ofHom, RingEquiv.coe_toRingHom, AlgEquiv.coe_ringEquiv,
+      Iso.refl_hom, CommRingCat.hom_id, RingHom.id_apply]
+    rw [AlgEquiv.commutes]
+    rfl
+  · refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+    simp only [RingEquiv.toCommRingCatIso_hom, CommRingCat.hom_comp, RingHom.coe_comp,
+      Function.comp_apply, CommRingCat.hom_ofHom, RingEquiv.coe_toRingHom, AlgEquiv.coe_ringEquiv,
+      Iso.refl_hom, CommRingCat.hom_id, RingHom.id_apply]
+    rw [AlgEquiv.commutes]
+    rfl
+  · refine CommRingCat.hom_ext (RingHom.ext fun p => ?_)
+    simp only [RingEquiv.toCommRingCatIso_hom, CommRingCat.hom_comp, RingHom.coe_comp,
+      Function.comp_apply, CommRingCat.hom_ofHom, RingEquiv.coe_toRingHom, AlgEquiv.coe_ringEquiv]
+    rw [Polynomial.algebraMap_def, Polynomial.coe_mapRingHom, AlgEquiv.symm_apply_eq,
+      chartMap_naturality_one, AlgEquiv.apply_symm_apply]
 
 /-- The base-change square of the `D₊(X₀)` chart ring is a pushout in `CommRingCat`. -/
 lemma isPushout_chart_zero :
@@ -112,7 +168,32 @@ lemma isPushout_chart_zero :
       (CommRingCat.ofHom (chartAlgHom k₀ 0))
       (CommRingCat.ofHom (chartAlgHom K 0))
       (CommRingCat.ofHom (chartMap k₀ K 0)) := by
-  sorry
+  letI : Algebra (Polynomial k₀) (Polynomial K) := Polynomial.algebra k₀ K
+  haveI : IsScalarTower k₀ K (Polynomial K) := .of_algebraMap_eq fun _ => rfl
+  haveI : IsScalarTower k₀ (Polynomial k₀) (Polynomial K) :=
+    .of_algebraMap_eq fun x => by simp [Polynomial.algebraMap_def, Polynomial.coe_mapRingHom]
+  refine (CommRingCat.isPushout_of_isPushout k₀ K (Polynomial k₀) (Polynomial K)).of_iso
+    (Iso.refl _) (Iso.refl _)
+    (awayChartEquivZero k₀).symm.toRingEquiv.toCommRingCatIso
+    (awayChartEquivZero K).symm.toRingEquiv.toCommRingCatIso ?_ ?_ ?_ ?_
+  · simp
+  · refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+    simp only [RingEquiv.toCommRingCatIso_hom, CommRingCat.hom_comp, RingHom.coe_comp,
+      Function.comp_apply, CommRingCat.hom_ofHom, RingEquiv.coe_toRingHom, AlgEquiv.coe_ringEquiv,
+      Iso.refl_hom, CommRingCat.hom_id, RingHom.id_apply]
+    rw [AlgEquiv.commutes]
+    rfl
+  · refine CommRingCat.hom_ext (RingHom.ext fun c => ?_)
+    simp only [RingEquiv.toCommRingCatIso_hom, CommRingCat.hom_comp, RingHom.coe_comp,
+      Function.comp_apply, CommRingCat.hom_ofHom, RingEquiv.coe_toRingHom, AlgEquiv.coe_ringEquiv,
+      Iso.refl_hom, CommRingCat.hom_id, RingHom.id_apply]
+    rw [AlgEquiv.commutes]
+    rfl
+  · refine CommRingCat.hom_ext (RingHom.ext fun p => ?_)
+    simp only [RingEquiv.toCommRingCatIso_hom, CommRingCat.hom_comp, RingHom.coe_comp,
+      Function.comp_apply, CommRingCat.hom_ofHom, RingEquiv.coe_toRingHom, AlgEquiv.coe_ringEquiv]
+    rw [Polynomial.algebraMap_def, Polynomial.coe_mapRingHom, AlgEquiv.symm_apply_eq,
+      chartMap_naturality_zero, AlgEquiv.apply_symm_apply]
 
 /-! ### The two-chart cover and the geometric chart square -/
 
@@ -162,13 +243,27 @@ lemma awayι_comp_structMap (k : Type u) [CommRing k] (i : Fin 2) :
   rw [structMap, Proj.awayι_toSpecZero_assoc, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
   rfl
 
+set_option backward.isDefEq.respectTransparency false in
 /-- The base-change morphism restricted to charts: `mapOfAlgebra` intertwines the chart
 inclusions via `Spec (chartMap)`. -/
 lemma awayι_comp_mapOfAlgebra (i : Fin 2) :
     Proj.awayι (P1Grading K) (X i) (X_mem_P1Grading K i) one_pos ≫ mapOfAlgebra k₀ K =
       Spec.map (CommRingCat.ofHom (chartMap k₀ K i)) ≫
         Proj.awayι (P1Grading k₀) (X i) (X_mem_P1Grading k₀ i) one_pos := by
-  sorry
+  have hfX : gradedMapOfAlgebra k₀ K (X i) = (X i : MvPolynomial (Fin 2) K) := gradedMap_X k₀ K i
+  have h := AlgebraicGeometry.Proj.awayι_comp_map
+    (f := gradedMapOfAlgebra k₀ K) (hf := irrelevant_le_map_gradedMapOfAlgebra k₀ K)
+    one_pos (X i : MvPolynomial (Fin 2) k₀) (X_mem_P1Grading k₀ i)
+  simp only [mapOfAlgebra, P1]
+  rw [awayι_eqToHom_transport one_pos hfX.symm (X_mem_P1Grading K i)
+      ((gradedMapOfAlgebra k₀ K).map_mem (X_mem_P1Grading k₀ i))]
+  simp only [Category.assoc]
+  rw [h, ← Spec.map_eqToHom (e := congrArg (fun s =>
+      CommRingCat.of (HomogeneousLocalization.Away (P1Grading K) s)) hfX)]
+  simp only [← Category.assoc]
+  congr 1
+  simp only [← Spec.map_comp]
+  congr 1
 
 /-- The chart square is a pullback: the base change of `mapOfAlgebra` along the chart inclusion
 `D₊(Xᵢ) ↪ ℙ¹_{k₀}` is the chart inclusion `D₊(Xᵢ) ↪ ℙ¹_K` with top map `Spec (chartMap)`. -/
