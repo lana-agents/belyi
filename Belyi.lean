@@ -8,3 +8,4 @@ import Belyi.Polynomial.CritVal
 import Belyi.Polynomial.Lambda
 import Belyi.Polynomial.ReductionRational
 import Belyi.Polynomial.ReductionZeroOne
+import Belyi.RationalMap
