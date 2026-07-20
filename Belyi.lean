@@ -2,6 +2,7 @@ import Belyi.Basic
 import Belyi.Curve.Basic
 import Belyi.Curve.ToP1
 import Belyi.Definable
+import Belyi.Dimension
 import Belyi.FunctionField
 import Belyi.P1
 import Belyi.P1.AffineChart
