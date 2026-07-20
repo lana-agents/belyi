@@ -9,6 +9,7 @@ import Belyi.Curve.ToP1
 import Belyi.Definable
 import Belyi.Dimension
 import Belyi.FunctionField
+import Belyi.KaehlerRank
 import Belyi.P1
 import Belyi.P1.AffineChart
 import Belyi.P1.BaseChange
