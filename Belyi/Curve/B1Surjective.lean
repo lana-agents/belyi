@@ -86,7 +86,18 @@ is all of `ℙ¹`. Reduces to `asHomogeneousIdeal_point_eq_bot` via
 `zeroLocus_bot`. -/
 theorem closure_point_eq_univ {t : K} (ht : Transcendental k t) :
     closure ({point k t (closedPoint K)} : Set (P1 k)) = Set.univ := by
-  sorry
+  have hpbot : (point k t (closedPoint K) :
+      ProjectiveSpectrum (P1Grading k)).asHomogeneousIdeal = ⊥ :=
+    asHomogeneousIdeal_point_eq_bot k ht
+  have huniv : closure ({(point k t (closedPoint K) : ProjectiveSpectrum (P1Grading k))} :
+      Set (ProjectiveSpectrum (P1Grading k))) = Set.univ := by
+    refine Set.eq_univ_of_forall fun y => ?_
+    refine (ProjectiveSpectrum.le_iff_mem_closure (P1Grading k)
+      (point k t (closedPoint K) : ProjectiveSpectrum (P1Grading k)) y).mp ?_
+    have hle : (point k t (closedPoint K) : ProjectiveSpectrum (P1Grading k)).asHomogeneousIdeal ≤
+        y.asHomogeneousIdeal := by rw [hpbot]; exact bot_le
+    exact hle
+  exact huniv
 
 end Belyi.P1
 
@@ -98,6 +109,7 @@ variable (k : Type u) [Field k] (X : Scheme.{u}) [IrreducibleSpace X]
   [X.Over (Spec (CommRingCat.of k))] [IsIntegral X]
   [IsProper (X ↘ Spec (CommRingCat.of k))]
 
+omit [IsProper (X ↘ Spec (CommRingCat.of k))] in
 /-- **B1, dominance**: the morphism `X ⟶ ℙ¹` attached to a transcendental function is
 dominant. The generic point of `X` maps to the generic point of `ℙ¹`
 (`homOfFunctionField_genericPoint` + `P1.asHomogeneousIdeal_point_eq_bot`), and `X` is
@@ -116,7 +128,9 @@ theorem isDominant_homOfFunctionField
     (hX : ∀ x : X, ValuationRing (X.presheaf.stalk x))
     {t : X.functionField} (ht : Transcendental k t) :
     IsDominant (homOfFunctionField k X hX t) := by
-  sorry
+  refine ⟨denseRange_iff_closure_range.mpr (Set.eq_univ_of_univ_subset ?_)⟩
+  rw [← P1.closure_point_eq_univ k ht, ← homOfFunctionField_genericPoint k X hX t]
+  exact closure_mono (Set.singleton_subset_iff.mpr (Set.mem_range_self _))
 
 /-- **B1, surjectivity**: the morphism `X ⟶ ℙ¹` attached to a transcendental function is
 surjective. Finite ⇒ integral ⇒ universally closed, plus dominant ⇒ surjective
