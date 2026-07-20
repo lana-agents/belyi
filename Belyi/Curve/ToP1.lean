@@ -90,4 +90,20 @@ instance (hX : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (t : X.functionFie
   haveI : (P1 k).IsSeparated := isSeparated_P1 k
   RationalMap.isOver_toHom (Spec (CommRingCat.of k)) _ hX
 
+/-- A morphism over `S` from a scheme proper over `S` to a scheme separated over `S`
+is proper. -/
+lemma isProper_of_isOver {X Y S : Scheme.{u}} [X.Over S] [Y.Over S] (f : X ⟶ Y)
+    [f.IsOver S] [IsProper (X ↘ S)] [IsSeparated (Y ↘ S)] : IsProper f :=
+  have h : IsProper (f ≫ (Y ↘ S)) := by rw [comp_over]; infer_instance
+  IsProper.of_comp f (Y ↘ S)
+
+/-- If `X` is proper over `k` (e.g. a curve), the morphism to `ℙ¹` attached to a
+rational function is proper. Together with quasi-finiteness (which needs the
+dimension-1 hypothesis and non-constancy of `t`) this will give B1 via Zariski's
+main theorem (`IsFinite.of_isProper_of_locallyQuasiFinite`). -/
+lemma isProper_homOfFunctionField [IsProper (X ↘ Spec (CommRingCat.of k))]
+    (hX : ∀ x : X, ValuationRing (X.presheaf.stalk x)) (t : X.functionField) :
+    IsProper (homOfFunctionField k X hX t) :=
+  isProper_of_isOver (S := Spec (CommRingCat.of k)) _
+
 end Belyi
