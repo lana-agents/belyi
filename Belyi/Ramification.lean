@@ -6,6 +6,7 @@ Authors: The Belyi project contributors
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Belyi.Dimension
 
 /-!
 # Ramification and branch loci
@@ -35,9 +36,15 @@ smooth locus is the étale locus. So we set
   `Branch (f ≫ g) ⊆ g '' Branch f ∪ Branch g`.
 * `Belyi.ram_eq_empty_of_isIso`, `Belyi.branch_eq_empty_of_isIso` and the cancellation
   lemmas for composing with an isomorphism.
+* `Belyi.finite_ram`, `Belyi.finite_branch`: on an irreducible Noetherian scheme with
+  one-dimensional local rings, a morphism smooth at the generic point ramifies only at
+  finitely many points; `Belyi.finite_ram_of_perfectField` discharges the generic
+  hypothesis for morphisms to the spectrum of a perfect field.
+* `Belyi.smooth_morphismRestrict_of_disjoint_branch` (**B2c**): a morphism is smooth
+  over any open subset of the target disjoint from its branch locus.
 
-Finiteness of `Ram f` for a finite morphism of curves in characteristic zero (which
-needs generic étaleness), B2b (base change) and B2c are follow-up work on the same
+B2b (compatibility with base change along a field extension) and generic étaleness for
+finite morphisms of curves in characteristic zero are follow-up work on the same
 issue.
 -/
 
@@ -45,7 +52,7 @@ universe u
 
 namespace Belyi
 
-open AlgebraicGeometry CategoryTheory
+open AlgebraicGeometry CategoryTheory TopologicalSpace
 
 variable {X Y Z : Scheme.{u}}
 
@@ -145,5 +152,80 @@ theorem branch_comp_subset [LocallyOfFinitePresentation f] [LocallyOfFinitePrese
   · exact Or.inr ⟨f x, h, rfl⟩
 
 end Comp
+
+section Finite
+
+variable (f : X ⟶ Y) [LocallyOfFinitePresentation f]
+
+/-- **Finiteness of the ramification locus.** On an irreducible Noetherian scheme whose
+local rings have Krull dimension `≤ 1` (e.g. a curve, by issue #75), a morphism that is
+smooth at the generic point ramifies only at finitely many points: `Ram f` is a closed
+set avoiding the generic point.
+
+For a finite morphism of curves in characteristic zero the hypothesis `hgen` holds
+because the function-field extension is separable (generic étaleness). -/
+theorem finite_ram [IrreducibleSpace X] [NoetherianSpace X]
+    (hdim : ∀ x : X, Ring.KrullDimLE 1 (X.presheaf.stalk x))
+    (hgen : genericPoint X ∈ f.smoothLocus) : (Ram f).Finite :=
+  finite_of_isClosed_of_genericPoint_notMem hdim (isClosed_ram f) (by simpa [Ram] using hgen)
+
+/-- The branch locus of a generically smooth morphism as above is finite. -/
+theorem finite_branch [IrreducibleSpace X] [NoetherianSpace X]
+    (hdim : ∀ x : X, Ring.KrullDimLE 1 (X.presheaf.stalk x))
+    (hgen : genericPoint X ∈ f.smoothLocus) : (Branch f).Finite :=
+  (finite_ram f hdim hgen).image f
+
+/-- Over a perfect base field (e.g. in characteristic zero), a morphism from an integral
+scheme is automatically smooth at the generic point, so the ramification locus of a
+morphism of such schemes over the field is finite as soon as the source has
+one-dimensional stalks. -/
+theorem finite_ram_of_perfectField {k : Type u} [Field k] [PerfectField k] [IsIntegral X]
+    [NoetherianSpace X] (hdim : ∀ x : X, Ring.KrullDimLE 1 (X.presheaf.stalk x))
+    (g : X ⟶ Spec (CommRingCat.of k)) [LocallyOfFinitePresentation g] : (Ram g).Finite :=
+  finite_ram g hdim g.genericPoint_mem_smoothLocus_of_perfectField
+
+end Finite
+
+section Restrict
+
+/-- Composing with an open immersion on the target does not change the smooth locus. -/
+lemma smoothLocus_comp_of_isOpenImmersion (f : X ⟶ Y) (g : Y ⟶ Z) [IsOpenImmersion g]
+    [LocallyOfFinitePresentation f] [LocallyOfFinitePresentation (f ≫ g)] :
+    (f ≫ g).smoothLocus = f.smoothLocus := by
+  refine TopologicalSpace.Opens.ext (Set.ext fun x => ?_)
+  change x ∈ (f ≫ g).smoothLocus ↔ x ∈ f.smoothLocus
+  rw [Scheme.Hom.mem_smoothLocus, Scheme.Hom.mem_smoothLocus, Scheme.Hom.stalkMap_comp]
+  exact RingHom.FormallySmooth.respectsIso.cancel_left_isIso
+    (g.stalkMap (f x)) (f.stalkMap x)
+
+/-- A morphism is smooth over any open subset of the target above which it is
+unramified. -/
+lemma smooth_morphismRestrict (f : X ⟶ Y) [LocallyOfFinitePresentation f] (U : Y.Opens)
+    [LocallyOfFinitePresentation (f ∣_ U)] (h : (f ⁻¹ᵁ U : Set X) ⊆ (f.smoothLocus : Set X)) :
+    Smooth (f ∣_ U) := by
+  rw [← Scheme.Hom.smoothLocus_eq_top_iff]
+  have h1 : ((f ∣_ U) ≫ U.ι).smoothLocus = (f ∣_ U).smoothLocus :=
+    smoothLocus_comp_of_isOpenImmersion _ _
+  have h2 : ((f ⁻¹ᵁ U).ι ≫ f).smoothLocus = (f ⁻¹ᵁ U).ι ⁻¹ᵁ f.smoothLocus :=
+    (Scheme.Hom.preimage_smoothLocus_eq _ _).symm
+  have h3 : ((f ∣_ U) ≫ U.ι).smoothLocus = ((f ⁻¹ᵁ U).ι ≫ f).smoothLocus := by
+    congr 1
+    exact morphismRestrict_ι f U
+  have h4 : (f ⁻¹ᵁ U).ι ⁻¹ᵁ f.smoothLocus = ⊤ :=
+    TopologicalSpace.Opens.ext (Set.eq_univ_of_forall fun x => h x.2)
+  rw [← h1, h3, h2, h4]
+
+/-- **B2c**: a morphism is smooth over any open subset of the target avoiding its branch
+locus. For a morphism of relative dimension `0` (e.g. a finite morphism of curves) this
+says it is étale there. -/
+theorem smooth_morphismRestrict_of_disjoint_branch (f : X ⟶ Y)
+    [LocallyOfFinitePresentation f] (U : Y.Opens)
+    [LocallyOfFinitePresentation (f ∣_ U)] (h : Disjoint (U : Set Y) (Branch f)) :
+    Smooth (f ∣_ U) := by
+  refine smooth_morphismRestrict f U fun x hx => ?_
+  by_contra hxs
+  exact Set.disjoint_left.mp h hx ⟨x, hxs, rfl⟩
+
+end Restrict
 
 end Belyi
