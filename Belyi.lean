@@ -13,6 +13,7 @@ import Belyi.FunctionField
 import Belyi.KaehlerRank
 import Belyi.P1
 import Belyi.P1.AffineChart
+import Belyi.P1.AffineChartBaseChange
 import Belyi.P1.BaseChange
 import Belyi.P1.Points
 import Belyi.P1.PointsBaseChange
