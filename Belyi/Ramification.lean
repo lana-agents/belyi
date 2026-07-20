@@ -6,6 +6,9 @@ Authors: The Belyi project contributors
 import Mathlib.AlgebraicGeometry.Morphisms.Etale
 import Mathlib.AlgebraicGeometry.Morphisms.Smooth
 import Mathlib.AlgebraicGeometry.Morphisms.Finite
+import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
+import Mathlib.AlgebraicGeometry.FunctionField
+import Mathlib.RingTheory.Smooth.Field
 import Belyi.Dimension
 
 /-!
@@ -42,10 +45,18 @@ smooth locus is the étale locus. So we set
   hypothesis for morphisms to the spectrum of a perfect field.
 * `Belyi.smooth_morphismRestrict_of_disjoint_branch` (**B2c**): a morphism is smooth
   over any open subset of the target disjoint from its branch locus.
+* `Belyi.ram_isIso_comp`, `Belyi.branch_isIso_comp`, `Belyi.ram_comp_isIso`,
+  `Belyi.branch_comp_isIso`: the behaviour of the ramification and branch loci under
+  composition with an isomorphism on either side.
+* `Belyi.genericPoint_mem_smoothLocus`: **generic étaleness** — a dominant, locally-of-
+  finite-presentation morphism of integral schemes with perfect target function field
+  (e.g. a dominant finite morphism of curves in characteristic zero) is smooth at the
+  generic point of the source. Hence `Belyi.finite_ram_of_isDominant`,
+  `Belyi.finite_branch_of_isDominant` discharge the generic hypothesis of `finite_ram`
+  for such morphisms — in particular the finite surjective `X ⟶ ℙ¹` produced by B1.
 
-B2b (compatibility with base change along a field extension) and generic étaleness for
-finite morphisms of curves in characteristic zero are follow-up work on the same
-issue.
+B2b (compatibility with base change along a field extension) is follow-up work on the
+same issue.
 -/
 
 universe u
@@ -186,6 +197,60 @@ theorem finite_ram_of_perfectField {k : Type u} [Field k] [PerfectField k] [IsIn
 
 end Finite
 
+section GenericEtale
+
+/-- For a **dominant** morphism of integral schemes, the generic point of the source maps
+to the generic point of the target. -/
+lemma image_genericPoint_eq_of_isDominant (f : X ⟶ Y) [IrreducibleSpace X]
+    [IrreducibleSpace Y] [IsDominant f] : f (genericPoint X) = genericPoint Y := by
+  have h := (genericPoint_spec X).image (f := ⇑f) f.continuous
+  rw [Set.image_univ, f.denseRange.closure_range] at h
+  exact h.eq (genericPoint_spec Y)
+
+/-- **Generic étaleness.** A dominant morphism of integral schemes that is locally of
+finite presentation is smooth at the generic point of the source, provided the function
+field of the target is perfect (e.g. in characteristic zero). Indeed the stalk map at the
+generic point is the extension of function fields `K(Y) → K(X)`, an essentially finite type
+extension of a perfect field, hence formally smooth.
+
+This discharges the `hgen` hypothesis of `finite_ram`/`finite_branch` for a dominant
+finite morphism of curves in characteristic zero — in particular for the finite surjective
+morphism `X ⟶ ℙ¹` produced by B1. -/
+theorem genericPoint_mem_smoothLocus (f : X ⟶ Y) [IsIntegral X] [IsIntegral Y]
+    [IsDominant f] [LocallyOfFinitePresentation f] [PerfectField Y.functionField] :
+    genericPoint X ∈ f.smoothLocus := by
+  have hgen : f (genericPoint X) = genericPoint Y := image_genericPoint_eq_of_isDominant f
+  have hess := LocallyOfFiniteType.stalkMap f (genericPoint X)
+  rw [Scheme.Hom.mem_smoothLocus]
+  -- the source stalk is the function field of `Y` (a perfect field), via `f genX = genY`
+  let ee : Y.presheaf.stalk (f (genericPoint X)) ≃+* Y.functionField :=
+    (Y.presheaf.stalkCongr (.of_eq hgen)).commRingCatIsoToRingEquiv
+  letI : Field (Y.presheaf.stalk (f (genericPoint X))) :=
+    (ee.isField (Field.toIsField Y.functionField)).toField
+  letI : PerfectField (Y.presheaf.stalk (f (genericPoint X))) :=
+    PerfectField.of_ringEquiv ee.symm
+  algebraize [(f.stalkMap (genericPoint X)).hom]
+  exact Algebra.FormallySmooth.of_perfectField
+
+/-- The ramification locus of a dominant, locally-of-finite-presentation morphism of
+integral schemes is finite, provided the source has one-dimensional stalks and the target
+function field is perfect (e.g. a dominant finite morphism of curves in characteristic
+zero). -/
+theorem finite_ram_of_isDominant (f : X ⟶ Y) [IsIntegral X] [IsIntegral Y]
+    [NoetherianSpace X] [IsDominant f] [LocallyOfFinitePresentation f]
+    [PerfectField Y.functionField]
+    (hdim : ∀ x : X, Ring.KrullDimLE 1 (X.presheaf.stalk x)) : (Ram f).Finite :=
+  finite_ram f hdim (genericPoint_mem_smoothLocus f)
+
+/-- The branch locus of such a morphism is finite. -/
+theorem finite_branch_of_isDominant (f : X ⟶ Y) [IsIntegral X] [IsIntegral Y]
+    [NoetherianSpace X] [IsDominant f] [LocallyOfFinitePresentation f]
+    [PerfectField Y.functionField]
+    (hdim : ∀ x : X, Ring.KrullDimLE 1 (X.presheaf.stalk x)) : (Branch f).Finite :=
+  finite_branch f hdim (genericPoint_mem_smoothLocus f)
+
+end GenericEtale
+
 section Restrict
 
 /-- Composing with an open immersion on the target does not change the smooth locus. -/
@@ -227,5 +292,36 @@ theorem smooth_morphismRestrict_of_disjoint_branch (f : X ⟶ Y)
   exact Set.disjoint_left.mp h hx ⟨x, hxs, rfl⟩
 
 end Restrict
+
+section IsoCancel
+
+variable (f : X ⟶ Y)
+
+/-- Precomposing with an isomorphism pulls the ramification locus back along it. -/
+lemma ram_isIso_comp (e : Z ⟶ X) [IsIso e] [LocallyOfFinitePresentation f] :
+    Ram (e ≫ f) = e ⁻¹' Ram f := by
+  rw [Ram, Ram, ← Scheme.Hom.preimage_smoothLocus_eq e f, Scheme.Hom.coe_preimage,
+    Set.preimage_compl]
+
+/-- Precomposing with an isomorphism leaves the branch locus unchanged. -/
+lemma branch_isIso_comp (e : Z ⟶ X) [IsIso e] [LocallyOfFinitePresentation f] :
+    Branch (e ≫ f) = Branch f := by
+  have hsurj : Function.Surjective ⇑e := (Scheme.homeoOfIso (asIso e)).surjective
+  rw [Branch, Branch, ram_isIso_comp f e, Scheme.Hom.comp_base, TopCat.coe_comp,
+    Set.image_comp, Set.image_preimage_eq _ hsurj]
+
+/-- Postcomposing with an isomorphism leaves the ramification locus unchanged. -/
+lemma ram_comp_isIso (e : Y ⟶ Z) [IsIso e] [LocallyOfFinitePresentation f] :
+    Ram (f ≫ e) = Ram f := by
+  have : IsOpenImmersion e := inferInstance
+  rw [Ram, Ram, smoothLocus_comp_of_isOpenImmersion f e]
+
+/-- Postcomposing with an isomorphism pushes the branch locus forward along it. -/
+lemma branch_comp_isIso (e : Y ⟶ Z) [IsIso e] [LocallyOfFinitePresentation f] :
+    Branch (f ≫ e) = e '' Branch f := by
+  rw [Branch, Branch, ram_comp_isIso f e, Scheme.Hom.comp_base, TopCat.coe_comp,
+    Set.image_comp]
+
+end IsoCancel
 
 end Belyi
