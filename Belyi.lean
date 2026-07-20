@@ -9,6 +9,7 @@ import Belyi.Curve.SmoothStalk
 import Belyi.Curve.Stalks
 import Belyi.Curve.ToP1
 import Belyi.Definable
+import Belyi.DefinablePair
 import Belyi.Dimension
 import Belyi.FunctionField
 import Belyi.KaehlerRank
