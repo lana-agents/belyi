@@ -5,6 +5,9 @@ Authors: The Belyi project contributors
 -/
 import Mathlib.AlgebraicGeometry.Stalk
 import Mathlib.AlgebraicGeometry.Properties
+import Mathlib.AlgebraicGeometry.Noetherian
+import Mathlib.AlgebraicGeometry.Over
+import Mathlib.AlgebraicGeometry.Morphisms.FiniteType
 import Mathlib.RingTheory.KrullDimension.Basic
 import Mathlib.Topology.NoetherianSpace
 
@@ -146,5 +149,14 @@ lemma finite_preimage_singleton_of_isClosedMap {Y : Scheme.{u}} (f : X ⟶ Y)
       rwa [Set.image_singleton, show f.base x = y from hx] at this
     exact finite_of_isClosed_of_genericPoint_notMem hdim
       (h2.preimage f.base.hom.continuous) hy
+
+/-- A scheme quasi-compact and locally of finite type over a Noetherian quasi-compact
+scheme (e.g. proper over the spectrum of a field) is Noetherian; in particular its
+underlying space is a Noetherian topological space (`IsNoetherian.noetherianSpace`). -/
+lemma isNoetherian_of_over (X S : Scheme.{u}) [X.Over S] [IsLocallyNoetherian S]
+    [CompactSpace S] [LocallyOfFiniteType (X ↘ S)] [QuasiCompact (X ↘ S)] :
+    IsNoetherian X where
+  toIsLocallyNoetherian := LocallyOfFiniteType.isLocallyNoetherian (X ↘ S)
+  toCompactSpace := QuasiCompact.compactSpace_of_compactSpace (X ↘ S)
 
 end Belyi
