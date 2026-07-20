@@ -1,4 +1,5 @@
 import Belyi.Basic
+import Belyi.BelyiMap
 import Belyi.Curve.B1
 import Belyi.Curve.BaseChange
 import Belyi.Curve.Basic
@@ -16,4 +17,5 @@ import Belyi.Polynomial.CritVal
 import Belyi.Polynomial.Lambda
 import Belyi.Polynomial.ReductionRational
 import Belyi.Polynomial.ReductionZeroOne
+import Belyi.Ramification
 import Belyi.RationalMap
