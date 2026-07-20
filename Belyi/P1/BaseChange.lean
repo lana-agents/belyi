@@ -31,9 +31,74 @@ follow-up work.
 * `Belyi.P1.gradedMapOfAlgebra`: the coefficient map as a graded ring homomorphism.
 * `Belyi.P1.mapOfAlgebra`: the induced morphism `P1 K ⟶ P1 k₀`.
 * `Belyi.P1.toPullback`: the comparison morphism into the base change of `P1 k₀`.
+
+## Main results
+
+* `AlgebraicGeometry.Proj.map_comp_toSpecZero`: functoriality of `Proj` commutes with the
+  structure morphisms `toSpecZero`, the induced map on the base being the degree-zero
+  component `f.gradedZeroRingHom` of the graded ring homomorphism. Stated in the mathlib
+  `AlgebraicGeometry` namespace as a PR candidate.
+* `Belyi.P1.mapOfAlgebra_comp_structMap`: the resulting commuting square for `ℙ¹`, which
+  makes `toPullback` unconditional (the hypothesis previously carried by `toPullback` is
+  now discharged).
 -/
 
 universe u
+
+namespace AlgebraicGeometry.Proj
+
+open CategoryTheory HomogeneousLocalization HomogeneousIdeal ProjectiveSpectrum
+
+section Naturality
+
+variable {A B σ τ : Type u} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A]
+  [CommRing B] [SetLike τ B] [AddSubgroupClass τ B]
+  {𝒜 : ℕ → σ} {ℬ : ℕ → τ} [GradedRing 𝒜] [GradedRing ℬ]
+
+/-- Naturality of `fromZeroRingHom` under `Away.map`: forming the degree-zero fraction
+`a ↦ a/1` commutes with a graded ring homomorphism `f`, its degree-zero component acting
+on the numerator. -/
+lemma _root_.HomogeneousLocalization.Away.map_fromZeroRingHom
+    (f : 𝒜 →+*ᵍ ℬ) (s : A) (a : 𝒜 0) :
+    HomogeneousLocalization.Away.map f s (fromZeroRingHom 𝒜 (.powers s) a) =
+      fromZeroRingHom ℬ (.powers (f s)) (f.gradedZeroRingHom a) := by
+  apply HomogeneousLocalization.val_injective
+  have e : fromZeroRingHom 𝒜 (Submonoid.powers s) a =
+      HomogeneousLocalization.mk ⟨0, a, 1, by simp⟩ := rfl
+  have e2 : fromZeroRingHom ℬ (Submonoid.powers (f s)) (f.gradedZeroRingHom a) =
+      HomogeneousLocalization.mk ⟨0, f.gradedZeroRingHom a, 1, by simp⟩ := rfl
+  rw [e, e2, HomogeneousLocalization.Away.map, HomogeneousLocalization.map_mk,
+    HomogeneousLocalization.val_mk, HomogeneousLocalization.val_mk]
+  simp only [GradedRingHom.gradedZeroRingHom_apply_coe]
+  congr 1
+  exact Subtype.ext (by simp)
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **Functoriality of `Proj` commutes with the structure morphism.** For a graded ring
+homomorphism `f : 𝒜 →+*ᵍ ℬ` with `ℬ₊ ≤ 𝒜₊.map f`, the square
+```
+Proj ℬ  --- map f hf --->  Proj 𝒜
+  |                          |
+toSpecZero ℬ           toSpecZero 𝒜
+  v                          v
+Spec (ℬ 0) - Spec f₀ -> Spec (𝒜 0)
+```
+commutes, where `f₀ = f.gradedZeroRingHom` is the degree-zero component of `f`. -/
+theorem map_comp_toSpecZero (f : 𝒜 →+*ᵍ ℬ) (hf : ℬ₊ ≤ 𝒜₊.map f) :
+    map f hf ≫ toSpecZero 𝒜 =
+      toSpecZero ℬ ≫ Spec.map (CommRingCat.ofHom f.gradedZeroRingHom) := by
+  refine (mapAffineOpenCover f hf).openCover.hom_ext _ _ fun s ↦ ?_
+  simp only [Scheme.AffineOpenCover.openCover_f, mapAffineOpenCover_f]
+  rw [awayι_comp_map_assoc f hf s.1.2 (s.2 : A) s.2.2,
+    awayι_toSpecZero 𝒜 (s.2 : A) s.2.2 s.1.2,
+    awayι_toSpecZero_assoc ℬ (f s.2) (f.2 s.2.2) s.1.2,
+    ← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp, ← CommRingCat.ofHom_comp]
+  congr 2
+  exact RingHom.ext (HomogeneousLocalization.Away.map_fromZeroRingHom f (s.2 : A))
+
+end Naturality
+
+end AlgebraicGeometry.Proj
 
 namespace Belyi.P1
 
@@ -97,23 +162,53 @@ lemma irrelevant_le_map_gradedMapOfAlgebra :
 noncomputable def mapOfAlgebra : P1 K ⟶ P1 k₀ :=
   Proj.map (gradedMapOfAlgebra k₀ K) (irrelevant_le_map_gradedMapOfAlgebra k₀ K)
 
+/-- The degree-zero component of the coefficient map, precomposed with the constants of
+`k₀`, is the constants of `K` precomposed with `k₀ ⊆ K`: both send `c` to the constant
+polynomial `C (algebraMap k₀ K c)`. This is the ring-level identity underlying the
+commuting square. -/
+lemma gradedZeroRingHom_gradedMapOfAlgebra_comp :
+    (gradedMapOfAlgebra k₀ K).gradedZeroRingHom.comp
+        (algebraMap k₀ (P1Grading k₀ 0)) =
+      (algebraMap K (P1Grading K 0)).comp (algebraMap k₀ K) := by
+  refine RingHom.ext fun c => Subtype.ext ?_
+  simp only [RingHom.comp_apply, GradedRingHom.gradedZeroRingHom_apply_coe,
+    gradedMapOfAlgebra_apply]
+  rw [SetLike.GradeZero.coe_algebraMap (P1Grading k₀), MvPolynomial.algebraMap_eq,
+    MvPolynomial.map_C, SetLike.GradeZero.coe_algebraMap (P1Grading K),
+    MvPolynomial.algebraMap_eq]
+
+/-- **The commuting square for the projective line** (taxis issue #82). The base-change
+comparison `mapOfAlgebra` commutes with the structure morphisms, so `ℙ¹_K` maps
+canonically into the base change of `ℙ¹_{k₀}`. -/
+theorem mapOfAlgebra_comp_structMap :
+    mapOfAlgebra k₀ K ≫ (P1 k₀ ↘ Spec (CommRingCat.of k₀)) =
+      (P1 K ↘ Spec (CommRingCat.of K)) ≫ specAlgebraMap k₀ K := by
+  change Proj.map (gradedMapOfAlgebra k₀ K) (irrelevant_le_map_gradedMapOfAlgebra k₀ K) ≫
+      (Proj.toSpecZero (P1Grading k₀) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap k₀ (P1Grading k₀ 0)))) =
+    (Proj.toSpecZero (P1Grading K) ≫
+        Spec.map (CommRingCat.ofHom (algebraMap K (P1Grading K 0)))) ≫
+      Spec.map (CommRingCat.ofHom (algebraMap k₀ K))
+  rw [← Category.assoc, AlgebraicGeometry.Proj.map_comp_toSpecZero, Category.assoc,
+    Category.assoc, ← Spec.map_comp, ← Spec.map_comp, ← CommRingCat.ofHom_comp,
+    ← CommRingCat.ofHom_comp, gradedZeroRingHom_gradedMapOfAlgebra_comp]
+
 /-- The comparison morphism from `ℙ¹_K` to the base change of `ℙ¹_{k₀}` along
 `Spec K ⟶ Spec k₀`. Showing that this is an isomorphism is the remaining content of the
 canonical identification `ℙ¹_{k₀} ×_{k₀} K ≅ ℙ¹_K` (taxis issue #48). -/
-noncomputable def toPullback
-    (h : mapOfAlgebra k₀ K ≫ (P1 k₀ ↘ Spec (CommRingCat.of k₀)) =
-      (P1 K ↘ Spec (CommRingCat.of K)) ≫ specAlgebraMap k₀ K) :
+noncomputable def toPullback :
     P1 K ⟶ pullback (P1 k₀ ↘ Spec (CommRingCat.of k₀)) (specAlgebraMap k₀ K) :=
-  pullback.lift (mapOfAlgebra k₀ K) (P1 K ↘ Spec (CommRingCat.of K)) h
+  pullback.lift (mapOfAlgebra k₀ K) (P1 K ↘ Spec (CommRingCat.of K))
+    (mapOfAlgebra_comp_structMap k₀ K)
 
 @[reassoc (attr := simp)]
-lemma toPullback_snd (h) :
-    toPullback k₀ K h ≫ pullback.snd _ _ = (P1 K ↘ Spec (CommRingCat.of K)) :=
+lemma toPullback_snd :
+    toPullback k₀ K ≫ pullback.snd _ _ = (P1 K ↘ Spec (CommRingCat.of K)) :=
   pullback.lift_snd _ _ _
 
 @[reassoc (attr := simp)]
-lemma toPullback_fst (h) :
-    toPullback k₀ K h ≫ pullback.fst _ _ = mapOfAlgebra k₀ K :=
+lemma toPullback_fst :
+    toPullback k₀ K ≫ pullback.fst _ _ = mapOfAlgebra k₀ K :=
   pullback.lift_fst _ _ _
 
 end Belyi.P1
