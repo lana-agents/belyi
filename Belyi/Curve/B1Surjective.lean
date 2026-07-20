@@ -47,6 +47,35 @@ Surjectivity is automatic from `[IsFinite f] [IsDominant f]`: mathlib gives
 
 universe u
 
+namespace AlgebraicGeometry.Proj
+
+open CategoryTheory HomogeneousLocalization
+
+variable {σ : Type*} {A : Type u} [CommRing A] [SetLike σ A] [AddSubgroupClass σ A]
+  (𝒜 : ℕ → σ) [GradedRing 𝒜]
+
+/-- The scheme morphism `Proj.basicOpenToSpec` and the locally-ringed-space morphism
+`ProjectiveSpectrum.Proj.toSpec` have the same underlying data: forgetting the scheme
+morphism to locally ringed spaces gives `toSpec`. This lets us transport the concrete
+point-computation lemmas about `toSpec` (e.g. `mk_mem_toSpec_base_apply`) to `basicOpenToSpec`
+and hence to `awayι`. -/
+lemma forgetToLocallyRingedSpace_map_basicOpenToSpec (f : A) :
+    Scheme.forgetToLocallyRingedSpace.map (Proj.basicOpenToSpec 𝒜 f) =
+      ProjectiveSpectrum.Proj.toSpec 𝒜 f := by
+  refine Eq.trans ?_ (ΓSpec.locallyRingedSpaceAdjunction.homEquiv_apply _ _ _).symm
+  dsimp [Proj.basicOpenToSpec, Scheme.Opens.toSpecΓ]
+  simp only [Category.assoc, ← Spec.map_comp]
+  rfl
+
+/-- Consequence of `forgetToLocallyRingedSpace_map_basicOpenToSpec`: the underlying point maps of
+`ProjectiveSpectrum.Proj.toSpec` and `Proj.basicOpenToSpec` agree. -/
+lemma toSpec_base_apply_eq_basicOpenToSpec (f : A) (w : (Proj.basicOpen 𝒜 f).toScheme) :
+    (ProjectiveSpectrum.Proj.toSpec 𝒜 f).base w = (Proj.basicOpenToSpec 𝒜 f).base w := by
+  rw [← forgetToLocallyRingedSpace_map_basicOpenToSpec 𝒜 f]
+  rfl
+
+end AlgebraicGeometry.Proj
+
 namespace Belyi.P1
 
 open AlgebraicGeometry CategoryTheory MvPolynomial HomogeneousLocalization
@@ -78,7 +107,67 @@ and `basicOpenIsoSpec.hom`'s base map agrees with `Proj.toSpec 𝒜 f`
 `mk_mem_toSpec_base_apply` after establishing `(Proj.toSpec 𝒜 f).base ⟨point, _⟩ = q`. -/
 theorem asHomogeneousIdeal_point_eq_bot {t : K} (ht : Transcendental k t) :
     (point k t (closedPoint K)).asHomogeneousIdeal = ⊥ := by
-  sorry
+  classical
+  set R := Away (P1Grading k) (X 1 : MvPolynomial (Fin 2) k) with hR
+  set y : Spec (CommRingCat.of R) :=
+    (Spec.map (CommRingCat.ofHom (awayEval k t))) (IsLocalRing.closedPoint K) with hy
+  have himg : point k t (IsLocalRing.closedPoint K) =
+      Proj.awayι (P1Grading k) (X 1) (X_mem_P1Grading k 1) one_pos y := by
+    rw [point, Scheme.Hom.comp_apply]
+    rfl
+  have hybot : (y : PrimeSpectrum R).asIdeal = ⊥ := by
+    have hyker : (y : PrimeSpectrum R).asIdeal = RingHom.ker (awayEval k t) := by
+      have hbot : (IsLocalRing.closedPoint K).asIdeal = ⊥ := IsLocalRing.maximalIdeal_eq_bot
+      rw [show (y : PrimeSpectrum R) =
+          PrimeSpectrum.comap (awayEval k t) (IsLocalRing.closedPoint K) from rfl,
+        PrimeSpectrum.comap_asIdeal, hbot]
+      rfl
+    rw [hyker, ker_awayEval k ht]
+  set w := (Proj.basicOpenIsoSpec (P1Grading k) (X 1) (X_mem_P1Grading k 1) one_pos).inv y
+    with hwdef
+  have hw1 : w.val = point k t (IsLocalRing.closedPoint K) := by
+    rw [himg, ← Proj.basicOpenIsoSpec_inv_ι (P1Grading k) (X 1) (X_mem_P1Grading k 1) one_pos,
+      Scheme.Hom.comp_apply, Scheme.Opens.ι_apply]
+  have htoSpecw : (ProjectiveSpectrum.Proj.toSpec (P1Grading k) (X 1)).base w = y := by
+    rw [Proj.toSpec_base_apply_eq_basicOpenToSpec (P1Grading k) (X 1),
+      ← Proj.basicOpenIsoSpec_hom (P1Grading k) (X 1) (X_mem_P1Grading k 1) one_pos, hwdef,
+      ← Scheme.Hom.comp_apply, Iso.inv_hom_id]
+    rfl
+  rw [← hw1]
+  refine HomogeneousIdeal.ext' fun i a ha => ?_
+  have hden : (X 1 : MvPolynomial (Fin 2) k) ^ i ∈ P1Grading k i := by
+    simpa using SetLike.pow_mem_graded i (X_mem_P1Grading k 1)
+  have hmem := ProjectiveSpectrum.Proj.mk_mem_toSpec_base_apply (P1Grading k) w
+    (⟨i, ⟨a, ha⟩, ⟨(X 1 : MvPolynomial (Fin 2) k) ^ i, hden⟩, ⟨i, rfl⟩⟩ :
+      NumDenSameDeg (P1Grading k) (Submonoid.powers (X 1 : MvPolynomial (Fin 2) k)))
+  rw [htoSpecw, hybot, Ideal.mem_bot] at hmem
+  -- hmem : HomogeneousLocalization.mk ⟨…⟩ = 0 ↔ a ∈ w.1.asHomogeneousIdeal
+  have hmkzero : (HomogeneousLocalization.mk
+      (⟨i, ⟨a, ha⟩, ⟨(X 1 : MvPolynomial (Fin 2) k) ^ i, hden⟩, ⟨i, rfl⟩⟩ :
+        NumDenSameDeg (P1Grading k) (Submonoid.powers (X 1 : MvPolynomial (Fin 2) k)))) = 0
+      ↔ a = 0 := by
+    rw [HomogeneousLocalization.ext_iff_val, HomogeneousLocalization.val_mk,
+      HomogeneousLocalization.val_zero, Localization.mk_eq_mk', IsLocalization.mk'_eq_zero_iff]
+    constructor
+    · rintro ⟨⟨m, j, rfl⟩, hma⟩
+      rcases mul_eq_zero.mp hma with h | h
+      · exact absurd h (pow_ne_zero j (X_ne_zero (R := k) 1))
+      · exact h
+    · rintro rfl
+      exact ⟨1, by simp⟩
+  rw [hmkzero] at hmem
+  -- hmem : a = 0 ↔ a ∈ w.1.asHomogeneousIdeal
+  constructor
+  · intro haI
+    have h0 : a = 0 := hmem.mpr haI
+    rw [h0]
+    exact zero_mem _
+  · intro haB
+    have h0 : a = 0 := by
+      rw [← HomogeneousIdeal.mem_iff, HomogeneousIdeal.toIdeal_bot, Ideal.mem_bot] at haB
+      exact haB
+    rw [h0]
+    exact zero_mem _
 
 /-- The point of `ℙ¹` attached to a transcendental element has dense closure: its closure
 is all of `ℙ¹`. Reduces to `asHomogeneousIdeal_point_eq_bot` via

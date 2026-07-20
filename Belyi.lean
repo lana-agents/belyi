@@ -2,6 +2,7 @@ import Belyi.Basic
 import Belyi.BelyiMap
 import Belyi.Cotangent
 import Belyi.Curve.B1
+import Belyi.Curve.B1Surjective
 import Belyi.Curve.BaseChange
 import Belyi.Curve.Basic
 import Belyi.Curve.SmoothStalk
