@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.Curve.Basic
+import Belyi.Cotangent
 import Mathlib.RingTheory.DiscreteValuationRing.TFAE
 import Mathlib.RingTheory.Noetherian.Basic
 import Mathlib.AlgebraicGeometry.Noetherian
@@ -36,6 +37,11 @@ locally Noetherian scheme: the stalks are Noetherian local domains
 * `Belyi.valuationRing_stalk_of_cotangent`, `Belyi.krullDimLE_one_stalk_of_cotangent`:
   the scheme-level packaging, in exactly the `∀ x : X, …` shape that
   `Belyi.isFinite_homOfFunctionField` consumes.
+* `Belyi.valuationRing_of_finrank_kaehler_le_one`,
+  `Belyi.krullDimLE_one_of_finrank_kaehler_le_one`: the same conclusions from a rank
+  bound on the Kähler differentials, obtained by chaining the conormal exact sequence
+  of `Belyi/Cotangent.lean`. This is the form in which the remaining smoothness input
+  of #75 will be consumed: only the *rank of `Ω` at a stalk* is still needed.
 -/
 
 universe u
@@ -104,5 +110,45 @@ theorem krullDimLE_one_stalk_of_cotangent
   krullDimLE_one_of_finrank_cotangentSpace_le_one _ (h x)
 
 end Scheme
+
+section Kaehler
+
+open Module IsLocalRing KaehlerDifferential TensorProduct
+
+variable (A : Type*) [CommRing A] [IsNoetherianRing A] [IsLocalRing A] [IsDomain A]
+  {k : Type*} [Field k] [Algebra k A]
+
+/-- **From Kähler differentials to valuation rings** (taxis issue #75). If `A` is a
+Noetherian local domain, formally smooth over `k` with formally smooth residue field
+(automatic in characteristic zero), and the base change of `Ω[A⁄k]` to the residue field
+has dimension at most `1`, then `A` is a discrete valuation ring or a field.
+
+Chaining `Belyi.finrank_cotangentSpace_le` (the conormal sequence) with the cotangent
+criterion above; the two consequences below are exactly the hypotheses `hX` and `hdim`
+of `Belyi.isFinite_homOfFunctionField`. -/
+theorem isDiscreteValuationRing_or_isField_of_finrank_kaehler_le_one
+    [Algebra.FormallySmooth k A] [Algebra.FormallySmooth k (ResidueField A)]
+    [Module.Finite (ResidueField A) (ResidueField A ⊗[A] Ω[A⁄k])]
+    (h : finrank (ResidueField A) (ResidueField A ⊗[A] Ω[A⁄k]) ≤ 1) :
+    IsDiscreteValuationRing A ∨ IsField A :=
+  isDiscreteValuationRing_or_isField_of_finrank_cotangentSpace_le_one A
+    (finrank_cotangentSpace_le_of_finrank_kaehler_le h)
+
+theorem valuationRing_of_finrank_kaehler_le_one
+    [Algebra.FormallySmooth k A] [Algebra.FormallySmooth k (ResidueField A)]
+    [Module.Finite (ResidueField A) (ResidueField A ⊗[A] Ω[A⁄k])]
+    (h : finrank (ResidueField A) (ResidueField A ⊗[A] Ω[A⁄k]) ≤ 1) : ValuationRing A :=
+  valuationRing_of_finrank_cotangentSpace_le_one A
+    (finrank_cotangentSpace_le_of_finrank_kaehler_le h)
+
+theorem krullDimLE_one_of_finrank_kaehler_le_one
+    [Algebra.FormallySmooth k A] [Algebra.FormallySmooth k (ResidueField A)]
+    [Module.Finite (ResidueField A) (ResidueField A ⊗[A] Ω[A⁄k])]
+    (h : finrank (ResidueField A) (ResidueField A ⊗[A] Ω[A⁄k]) ≤ 1) :
+    Ring.KrullDimLE 1 A :=
+  krullDimLE_one_of_finrank_cotangentSpace_le_one A
+    (finrank_cotangentSpace_le_of_finrank_kaehler_le h)
+
+end Kaehler
 
 end Belyi

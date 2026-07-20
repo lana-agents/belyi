@@ -1,5 +1,6 @@
 import Belyi.Basic
 import Belyi.BelyiMap
+import Belyi.Cotangent
 import Belyi.Curve.B1
 import Belyi.Curve.BaseChange
 import Belyi.Curve.Basic
