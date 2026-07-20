@@ -93,6 +93,23 @@ lemma of_isIso_comp {X' : Scheme.{u}} (e : X' ⟶ X) [IsIso e]
     simp only [branch_eq_empty_of_isIso, Set.image_empty, Set.empty_union]
     exact h.branch_subset
 
+/-- **B5 → Belyi maps**: if `f : X ⟶ ℙ¹` is finite and `g : ℙ¹ ⟶ ℙ¹` is a finite
+self-map carrying the branch locus of `f` and its own branch locus into the marked
+points, then `f ≫ g` is a Belyi map.
+
+This is the bookkeeping step of the forward direction (B8): `f` is the map to `ℙ¹`
+produced by B1, and `g` is the polynomial map produced by the reductions B6 (issue #49)
+and B7 (issue #50). -/
+lemma comp {f : X ⟶ P1 k} (g : P1 k ⟶ P1 k) [IsFinite f] [IsFinite g]
+    [LocallyOfFinitePresentation f] [LocallyOfFinitePresentation g]
+    [LocallyOfFinitePresentation (f ≫ g)]
+    (hbf : (g '' Branch f) ⊆ markedPoints k) (hbg : Branch g ⊆ markedPoints k) :
+    IsBelyiMap k (f ≫ g) where
+  isFinite := inferInstance
+  locallyOfFinitePresentation := inferInstance
+  branch_subset :=
+    (branch_comp_subset f g).trans (Set.union_subset hbf hbg)
+
 end IsBelyiMap
 
 end Belyi
