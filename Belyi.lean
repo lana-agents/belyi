@@ -7,6 +7,7 @@ import Belyi.FunctionField
 import Belyi.P1
 import Belyi.P1.AffineChart
 import Belyi.P1.Points
+import Belyi.P1.Transcendental
 import Belyi.Polynomial.CritVal
 import Belyi.Polynomial.Lambda
 import Belyi.Polynomial.ReductionRational
