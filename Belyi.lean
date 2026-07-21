@@ -29,6 +29,7 @@ import Belyi.P1.ChartTransition
 import Belyi.P1.Curve
 import Belyi.P1.Points
 import Belyi.P1.PointsBaseChange
+import Belyi.P1.PolynomialFinite
 import Belyi.P1.PolynomialMap
 import Belyi.P1.Transcendental
 import Belyi.Polynomial.CritVal
