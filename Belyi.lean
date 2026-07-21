@@ -35,4 +35,5 @@ import Belyi.Polynomial.Lambda
 import Belyi.Polynomial.ReductionRational
 import Belyi.Polynomial.ReductionZeroOne
 import Belyi.Ramification
+import Belyi.RamificationBaseChange
 import Belyi.RationalMap
