@@ -28,6 +28,7 @@ import Belyi.P1.ChartCoord
 import Belyi.P1.ChartInjective
 import Belyi.P1.ChartTransition
 import Belyi.P1.Curve
+import Belyi.P1.MarkedPointMatching
 import Belyi.P1.Points
 import Belyi.P1.PointsBaseChange
 import Belyi.P1.PolynomialFinite
