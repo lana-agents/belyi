@@ -334,7 +334,7 @@ lemma ι_polynomialSelfMap (hd : 0 < g.natDegree) (b : Bool) :
 
 /-- A chart inclusion followed by the structure morphism is the structure map of the chart ring:
 `awayι f' ≫ structMap = Spec.map (k → 𝒜₀ → (k[X₀,X₁]_{f'})₀)`. -/
-lemma awayι_comp_structMap {f' : MvPolynomial (Fin 2) k} {m : ℕ} (hf' : f' ∈ P1Grading k m)
+lemma chart_awayι_comp_structMap {f' : MvPolynomial (Fin 2) k} {m : ℕ} (hf' : f' ∈ P1Grading k m)
     (hm : 0 < m) :
     Proj.awayι (P1Grading k) f' hf' hm ≫ structMap k =
       Spec.map (CommRingCat.ofHom ((fromZeroRingHom (P1Grading k) (Submonoid.powers f')).comp
@@ -352,10 +352,10 @@ lemma polynomialSelfMap_structMap (hd : 0 < g.natDegree) :
   cases b
   · change selfMapChartOne k g ≫ structMap k =
       Proj.awayι (P1Grading k) (X 1) (X_mem_P1Grading k 1) one_pos ≫ structMap k
-    rw [selfMapChartOne, point_structMap, awayι_comp_structMap]; rfl
+    rw [selfMapChartOne, point_structMap, chart_awayι_comp_structMap]; rfl
   · change selfMapChartZero k g ≫ structMap k =
       Proj.awayι (P1Grading k) (homogInput k g) (homogInput_mem k g) hd ≫ structMap k
-    rw [selfMapChartZero, point₀_structMap, awayι_comp_structMap]; rfl
+    rw [selfMapChartZero, point₀_structMap, chart_awayι_comp_structMap]; rfl
 
 /-!
 ### Local finite presentation
