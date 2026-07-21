@@ -5,8 +5,12 @@ Authors: The Belyi project contributors
 -/
 import Belyi.P1.AffineChart0
 import Belyi.P1.Transcendental
+import Belyi.P1.ChartTransition
+import Belyi.P1.ChartCoord
 import Mathlib.Algebra.Polynomial.Homogenize
 import Mathlib.Algebra.MvPolynomial.Division
+import Mathlib.AlgebraicGeometry.Gluing
+import Mathlib.AlgebraicGeometry.Morphisms.FinitePresentation
 
 /-!
 # The polynomial self-map of the projective line
@@ -194,31 +198,261 @@ noncomputable def selfMapFamily (hd : 0 < g.natDegree) :
   fun b => Bool.rec (selfMapChartOne k g) (selfMapChartZero k g) b
 
 /-!
-### Remaining step: gluing the two chart maps
+### Naturality of the valued points in the coefficient ring
 
-`polynomialSelfMap g` is `(sourceCover k g hd).openCover.glueMorphisms (selfMapFamily k g hd) h`,
-where `h` is the overlap compatibility
-`∀ b b', pullback.fst (𝒰.f b) (𝒰.f b') ≫ selfMapFamily b = pullback.snd _ _ ≫ selfMapFamily b'`.
-
-* The diagonal cases `b = b'` are `CategoryTheory.Limits.pullback.fst_eq_snd_of_mono_eq`
-  (`Proj.awayι` is a mono).
-* The off-diagonal `(false, true)` reduces, via `Proj.pullbackAwayιIso` for `f = X₁`, `g = G`,
-  `x = X₁·G` and the naturality `h ∘ awayEval k t = awayEval k (h t)` of the valued points, to
-  the clean statement
-  ```
-  point k u = point₀ k v        (u v : Away (P1Grading k) (X 1 * homogInput k g), u * v = 1)
-  ```
-  with `u = G/X₁ᵈ = aeval (affineCoord k) g` (dehomogenisation, `aeval_homogenize_X_one`) and
-  `v = X₁ᵈ/G = selfMapCoordZero`, so `u * v = 1` by the reciprocity of the two target-chart
-  coordinates. The equality `point k u = point₀ k v` for `u * v = 1` (`u` a unit) is a reusable
-  chart-transition lemma: both sides factor through `Proj.awayι (X₀·X₁)` via
-  `Proj.SpecMap_awayMap_awayι`, and the two induced `HomogeneousLocalization.Away` ring maps
-  agree (`awayLift (aeval ![u,1])` on the `D₊(X₀X₁)` chart).
-* `(true, false)` is the mirror via `pullbackSymmetry`.
-
-Then `polynomialSelfMap g ≫ structMap k = structMap k` follows chartwise from `point_structMap`
-/ `point₀_structMap` + `Cover.hom_ext`, and `LocallyOfFinitePresentation` chartwise via
-`IsLocalAtSource`.
+For a `k`-algebra map `φ : R →+* R'` (compatibly with the algebra structures), precomposing a
+valued point by `Spec.map φ` reindexes its affine coordinate: `Spec.map φ ≫ point k t =
+point k (φ t)` (and likewise for `point₀`). This is what turns the two `awayMap`s coming out of
+`Proj.pullbackAwayιIso` into a plain change of coordinate.
 -/
+
+section Naturality
+
+variable {k}
+variable {R : Type u} [CommRing R] [Algebra k R]
+variable {R' : Type u} [CommRing R'] [Algebra k R']
+
+/-- Naturality of the `D₊(X₁)` valued point: `Spec.map φ ≫ point k t = point k (φ t)` for a
+ring hom `φ` compatible with the `k`-algebra structures. -/
+lemma SpecMap_comp_point (φ : R →+* R')
+    (hφ : ∀ c : k, φ (algebraMap k R c) = algebraMap k R' c) (t : R) :
+    Spec.map (CommRingCat.ofHom φ) ≫ point k t = point k (φ t) := by
+  have key : awayEval k (φ t) = φ.comp (awayEval k t) := by
+    refine RingHom.ext fun z => ?_
+    obtain ⟨n, a, ha, rfl⟩ :=
+      HomogeneousLocalization.Away.mk_surjective (P1Grading k) (X_mem_P1Grading k 1) z
+    have hv : (![φ t, 1] : Fin 2 → R') = fun i => φ (![t, 1] i) := by
+      funext i; fin_cases i <;> simp
+    rw [awayEval_mk, RingHom.comp_apply, awayEval_mk, map_aeval,
+      show φ.comp (algebraMap k R) = algebraMap k R' from RingHom.ext hφ, aeval_eq_eval₂Hom, hv]
+  simp only [point]
+  rw [key, CommRingCat.ofHom_comp, Spec.map_comp, Category.assoc]
+
+/-- Naturality of the `D₊(X₀)` valued point: `Spec.map φ ≫ point₀ k s = point₀ k (φ s)`. -/
+lemma SpecMap_comp_point₀ (φ : R →+* R')
+    (hφ : ∀ c : k, φ (algebraMap k R c) = algebraMap k R' c) (s : R) :
+    Spec.map (CommRingCat.ofHom φ) ≫ point₀ k s = point₀ k (φ s) := by
+  have key : awayEval₀ k (φ s) = φ.comp (awayEval₀ k s) := by
+    refine RingHom.ext fun z => ?_
+    obtain ⟨n, a, ha, rfl⟩ :=
+      HomogeneousLocalization.Away.mk_surjective (P1Grading k) (X_mem_P1Grading k 0) z
+    have hv : (![1, φ s] : Fin 2 → R') = fun i => φ (![1, s] i) := by
+      funext i; fin_cases i <;> simp
+    rw [awayEval₀_mk, RingHom.comp_apply, awayEval₀_mk, map_aeval,
+      show φ.comp (algebraMap k R) = algebraMap k R' from RingHom.ext hφ, aeval_eq_eval₂Hom, hv]
+  simp only [point₀]
+  rw [key, CommRingCat.ofHom_comp, Spec.map_comp, Category.assoc]
+
+end Naturality
+
+/-- The overlap-chart ring `(k[X₀,X₁]_{X₁·G})₀` of `D₊(X₁·G)` as a `k`-algebra. -/
+noncomputable scoped instance instAlgebraAwayMul :
+    Algebra k (Away (P1Grading k) (X 1 * homogInput k g)) :=
+  ((fromZeroRingHom (P1Grading k) (Submonoid.powers (X 1 * homogInput k g))).comp
+    (algebraMap k (P1Grading k 0))).toAlgebra
+
+/-- The dehomogenisation identity `g(X₀/X₁) = G/X₁ᵈ` in the chart ring of `D₊(X₁)`. -/
+lemma aeval_affineCoord_eq :
+    Polynomial.aeval (affineCoord k) g =
+      Away.mk (P1Grading k) (X_mem_P1Grading k 1) g.natDegree (homogInput k g)
+        (by simpa using homogInput_mem k g) := by
+  apply (awayChartEquivOne k).injective
+  rw [← Polynomial.aeval_algHom_apply, awayChartEquivOne_affineCoord, Polynomial.aeval_X_left_apply,
+    awayChartEquivOne, AlgEquiv.ofBijective_apply]
+  change g = awayEval k (Polynomial.X)
+    (Away.mk (P1Grading k) (X_mem_P1Grading k 1) g.natDegree (homogInput k g) _)
+  rw [awayEval_mk, homogInput]
+  exact (Polynomial.aeval_homogenize_X_one g le_rfl).symm
+
+/-- The two chart maps of `polynomialSelfMap` agree on the overlap `D₊(X₁·G)`: the target
+coordinates `g(x) = G/X₁ᵈ` and `X₁ᵈ/G` are mutually inverse. -/
+lemma selfMapChart_compat (hd : 0 < g.natDegree) :
+    Limits.pullback.fst
+        (Proj.awayι (P1Grading k) (X 1) (X_mem_P1Grading k 1) one_pos)
+        (Proj.awayι (P1Grading k) (homogInput k g) (homogInput_mem k g) hd)
+      ≫ selfMapChartOne k g =
+    Limits.pullback.snd _ _ ≫ selfMapChartZero k g := by
+  rw [← cancel_epi (Proj.pullbackAwayιIso (P1Grading k) (X_mem_P1Grading k 1) one_pos
+    (homogInput_mem k g) hd (rfl : (X 1 * homogInput k g) = X 1 * homogInput k g)).inv]
+  rw [← Category.assoc, ← Category.assoc, Proj.pullbackAwayιIso_inv_fst,
+    Proj.pullbackAwayιIso_inv_snd, selfMapChartOne, selfMapChartZero]
+  -- the two `awayMap`s are `k`-algebra maps into the overlap ring
+  have hφ₁ : ∀ c : k, HomogeneousLocalization.awayMap (P1Grading k) (homogInput_mem k g)
+        (rfl : (X 1 * homogInput k g) = X 1 * homogInput k g)
+        (algebraMap k (Away (P1Grading k) (X 1)) c) =
+      algebraMap k (Away (P1Grading k) (X 1 * homogInput k g)) c := fun c => by
+    rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra, RingHom.comp_apply,
+      RingHom.comp_apply]
+    exact HomogeneousLocalization.awayMap_fromZeroRingHom (P1Grading k) (homogInput_mem k g) rfl _
+  have hφ₀ : ∀ c : k, HomogeneousLocalization.awayMap (P1Grading k) (X_mem_P1Grading k 1)
+        (Eq.trans (rfl : (X 1 * homogInput k g) = X 1 * homogInput k g)
+          (mul_comm (X 1) (homogInput k g)))
+        (algebraMap k (Away (P1Grading k) (homogInput k g)) c) =
+      algebraMap k (Away (P1Grading k) (X 1 * homogInput k g)) c := fun c => by
+    rw [RingHom.algebraMap_toAlgebra, RingHom.algebraMap_toAlgebra, RingHom.comp_apply,
+      RingHom.comp_apply]
+    exact HomogeneousLocalization.awayMap_fromZeroRingHom (P1Grading k) (X_mem_P1Grading k 1) _ _
+  rw [SpecMap_comp_point _ hφ₁, SpecMap_comp_point₀ _ hφ₀]
+  -- reduce to the chart-transition lemma with reciprocal coordinates
+  refine point_eq_point₀ _ _ ?_
+  rw [aeval_affineCoord_eq, selfMapCoordZero]
+  apply HomogeneousLocalization.val_injective
+  rw [HomogeneousLocalization.val_mul, HomogeneousLocalization.val_one,
+    HomogeneousLocalization.awayMap_mk, HomogeneousLocalization.awayMap_mk,
+    HomogeneousLocalization.Away.val_mk, HomogeneousLocalization.Away.val_mk,
+    Localization.mk_mul, ← Localization.mk_one, Localization.mk_eq_mk_iff,
+    Localization.r_iff_exists]
+  refine ⟨1, ?_⟩
+  simp only [OneMemClass.coe_one, one_mul, Submonoid.coe_mul, mul_one]
+  ring
+
+/-- The overlap compatibility of the chart-map family over the source cover, packaging both
+diagonal cases (`Proj.awayι` is a mono) and the off-diagonal cases (`selfMapChart_compat` and
+its `pullbackSymmetry` mirror). -/
+lemma selfMapFamily_compat (hd : 0 < g.natDegree) (b b' : Bool) :
+    Limits.pullback.fst ((sourceCover k g hd).openCover.f b)
+        ((sourceCover k g hd).openCover.f b') ≫ selfMapFamily k g hd b =
+      Limits.pullback.snd _ _ ≫ selfMapFamily k g hd b' := by
+  cases b <;> cases b'
+  · exact congrArg (· ≫ _) (Limits.fst_eq_snd_of_mono_eq _)
+  · exact selfMapChart_compat k g hd
+  · rw [← cancel_epi (Limits.pullbackSymmetry _ _).hom, ← Category.assoc, ← Category.assoc,
+      Limits.pullbackSymmetry_hom_comp_fst, Limits.pullbackSymmetry_hom_comp_snd]
+    exact (selfMapChart_compat k g hd).symm
+  · exact congrArg (· ≫ _) (Limits.fst_eq_snd_of_mono_eq _)
+
+/-- **The polynomial self-map of `ℙ¹`.** For a non-constant `g : k[X]` of degree `d`, the finite
+self-map `[x₀ : x₁] ↦ [g.homogenize d : X₁ᵈ]` of `ℙ¹`, obtained by gluing the two chart maps
+`x ↦ g(x)` on `D₊(X₁)` and `Y₁/Y₀ ↦ X₁ᵈ/G` on `D₊(G)` over the source cover. -/
+noncomputable def polynomialSelfMap (hd : 0 < g.natDegree) : P1 k ⟶ P1 k :=
+  (sourceCover k g hd).openCover.glueMorphisms (selfMapFamily k g hd) (selfMapFamily_compat k g hd)
+
+@[reassoc]
+lemma ι_polynomialSelfMap (hd : 0 < g.natDegree) (b : Bool) :
+    (sourceCover k g hd).openCover.f b ≫ polynomialSelfMap k g hd = selfMapFamily k g hd b :=
+  (sourceCover k g hd).openCover.ι_glueMorphisms _ _ b
+
+/-- A chart inclusion followed by the structure morphism is the structure map of the chart ring:
+`awayι f' ≫ structMap = Spec.map (k → 𝒜₀ → (k[X₀,X₁]_{f'})₀)`. -/
+lemma chart_awayι_comp_structMap {f' : MvPolynomial (Fin 2) k} {m : ℕ} (hf' : f' ∈ P1Grading k m)
+    (hm : 0 < m) :
+    Proj.awayι (P1Grading k) f' hf' hm ≫ structMap k =
+      Spec.map (CommRingCat.ofHom ((fromZeroRingHom (P1Grading k) (Submonoid.powers f')).comp
+        (algebraMap k (P1Grading k 0)))) := by
+  change Proj.awayι (P1Grading k) f' hf' hm ≫ Proj.toSpecZero (P1Grading k) ≫
+    Spec.map (CommRingCat.ofHom (algebraMap k (P1Grading k 0))) = _
+  rw [← Category.assoc, Proj.awayι_toSpecZero, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+
+set_option backward.isDefEq.respectTransparency false in
+/-- The polynomial self-map is a morphism over `Spec k`. -/
+lemma polynomialSelfMap_structMap (hd : 0 < g.natDegree) :
+    polynomialSelfMap k g hd ≫ structMap k = structMap k := by
+  refine (sourceCover k g hd).openCover.hom_ext _ _ fun b => ?_
+  rw [ι_polynomialSelfMap_assoc, Scheme.AffineOpenCover.openCover_f]
+  cases b
+  · change selfMapChartOne k g ≫ structMap k =
+      Proj.awayι (P1Grading k) (X 1) (X_mem_P1Grading k 1) one_pos ≫ structMap k
+    rw [selfMapChartOne, point_structMap, chart_awayι_comp_structMap]; rfl
+  · change selfMapChartZero k g ≫ structMap k =
+      Proj.awayι (P1Grading k) (homogInput k g) (homogInput_mem k g) hd ≫ structMap k
+    rw [selfMapChartZero, point₀_structMap, chart_awayι_comp_structMap]; rfl
+
+/-!
+### Local finite presentation
+
+Each chart map is `Spec.map (awayEval …) ≫ awayι`; the `awayι` is an open immersion (hence
+locally of finite presentation) and `awayEval` is a map from the Noetherian chart ring
+`(k[X₀,X₁]_{X₁})₀ ≅ k[T]` which is of finite type — over a Noetherian source finite type is
+finite presentation. Locality at source then assembles the two charts.
+-/
+
+section FinitePresentation
+
+variable {k}
+variable {R : Type u} [CommRing R] [Algebra k R]
+
+/-- Any chart inclusion `awayι f'` is locally of finite presentation (it is an open immersion);
+stated standalone so the instance is available without polluting instance search in the
+finite-presentation proofs below. -/
+lemma locallyOfFinitePresentation_awayι {f' : MvPolynomial (Fin 2) k} {m : ℕ}
+    (hf' : f' ∈ P1Grading k m) (hm : 0 < m) :
+    LocallyOfFinitePresentation (Proj.awayι (P1Grading k) f' hf' hm) :=
+  inferInstance
+
+/-- The chart ring of `D₊(X₁)` is Noetherian (it is `k[T]`). -/
+instance : IsNoetherianRing (Away (P1Grading k) (X 1 : MvPolynomial (Fin 2) k)) :=
+  Algebra.FiniteType.isNoetherianRing k _ (h := finiteType_away k)
+
+/-- The chart ring of `D₊(X₀)` is Noetherian (it is `k[T]`). -/
+lemma isNoetherianRing_awayZero :
+    IsNoetherianRing (Away (P1Grading k) (X 0 : MvPolynomial (Fin 2) k)) := by
+  have h1 : (fromZeroRingHom (P1Grading k)
+      (Submonoid.powers (X 0 : MvPolynomial (Fin 2) k))).FiniteType :=
+    HomogeneousLocalization.Away.finiteType (X 0) 1 (X_mem_P1Grading k 0)
+  have h2 : (algebraMap k (P1Grading k 0)).FiniteType :=
+    RingHom.FiniteType.of_surjective _ (gradeZeroEquiv k).surjective
+  exact Algebra.FiniteType.isNoetherianRing k _ (h := h1.comp h2)
+
+/-- The `D₊(X₁)` valued point is locally of finite presentation whenever its coefficient ring is
+of finite type over `k`. -/
+lemma locallyOfFinitePresentation_point (t : R) [Algebra.FiniteType k R] :
+    LocallyOfFinitePresentation (point k t) := by
+  have hft : RingHom.FiniteType (awayEval k t) := by
+    apply RingHom.FiniteType.of_comp_finiteType (f := algebraMap k (Away (P1Grading k) (X 1)))
+    have heq : (awayEval k t).comp (algebraMap k (Away (P1Grading k) (X 1))) = algebraMap k R := by
+      ext c; exact (awayEvalₐ k t).commutes c
+    rw [heq, RingHom.finiteType_algebraMap]
+    infer_instance
+  haveI : LocallyOfFinitePresentation (Spec.map (CommRingCat.ofHom (awayEval k t))) := by
+    rw [LocallyOfFinitePresentation.SpecMap_iff, CommRingCat.hom_ofHom]
+    exact RingHom.FinitePresentation.of_finiteType.mp hft
+  rw [point]
+  exact locallyOfFinitePresentation_comp _ _
+    (hg := locallyOfFinitePresentation_awayι (X_mem_P1Grading k 1) one_pos)
+
+/-- The `D₊(X₀)` valued point is locally of finite presentation whenever its coefficient ring is
+of finite type over `k`. -/
+lemma locallyOfFinitePresentation_point₀ (s : R) [Algebra.FiniteType k R] :
+    LocallyOfFinitePresentation (point₀ k s) := by
+  haveI := isNoetherianRing_awayZero (k := k)
+  have hft : RingHom.FiniteType (awayEval₀ k s) := by
+    apply RingHom.FiniteType.of_comp_finiteType (f := algebraMap k (Away (P1Grading k) (X 0)))
+    have heq : (awayEval₀ k s).comp (algebraMap k (Away (P1Grading k) (X 0))) = algebraMap k R := by
+      ext c
+      have h := awayEval₀_fromZeroRingHom k s (algebraMap k (P1Grading k 0) c)
+      simp only [SetLike.GradeZero.coe_algebraMap, MvPolynomial.algebraMap_eq, aeval_C] at h
+      exact h
+    rw [heq, RingHom.finiteType_algebraMap]
+    infer_instance
+  haveI : LocallyOfFinitePresentation (Spec.map (CommRingCat.ofHom (awayEval₀ k s))) := by
+    rw [LocallyOfFinitePresentation.SpecMap_iff, CommRingCat.hom_ofHom]
+    exact RingHom.FinitePresentation.of_finiteType.mp hft
+  rw [point₀]
+  exact locallyOfFinitePresentation_comp _ _
+    (hg := locallyOfFinitePresentation_awayι (X_mem_P1Grading k 0) one_pos)
+
+end FinitePresentation
+
+/-- The chart ring `(k[X₀,X₁]_G)₀` of `D₊(G)` is of finite type over `k`. -/
+lemma finiteType_awayHomogInput : Algebra.FiniteType k (Away (P1Grading k) (homogInput k g)) := by
+  have h1 : (fromZeroRingHom (P1Grading k)
+      (Submonoid.powers (homogInput k g))).FiniteType :=
+    HomogeneousLocalization.Away.finiteType (homogInput k g) g.natDegree (homogInput_mem k g)
+  have h2 : (algebraMap k (P1Grading k 0)).FiniteType :=
+    RingHom.FiniteType.of_surjective _ (gradeZeroEquiv k).surjective
+  exact h1.comp h2
+
+set_option backward.isDefEq.respectTransparency false in
+/-- **The polynomial self-map is locally of finite presentation.** This is the property consumed
+by the downstream branch-locus / `IsBelyiMap` API (issues #107, #108). -/
+lemma locallyOfFinitePresentation_polynomialSelfMap (hd : 0 < g.natDegree) :
+    LocallyOfFinitePresentation (polynomialSelfMap k g hd) := by
+  refine IsZariskiLocalAtSource.of_openCover (sourceCover k g hd).openCover fun b => ?_
+  rw [ι_polynomialSelfMap]
+  cases b
+  · haveI := finiteType_away k
+    exact locallyOfFinitePresentation_point (Polynomial.aeval (affineCoord k) g)
+  · haveI := finiteType_awayHomogInput k g
+    exact locallyOfFinitePresentation_point₀ (selfMapCoordZero k g)
 
 end Belyi.P1
