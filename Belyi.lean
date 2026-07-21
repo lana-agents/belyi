@@ -5,6 +5,7 @@ import Belyi.Curve.B1
 import Belyi.Curve.B1Surjective
 import Belyi.Curve.BaseChange
 import Belyi.Curve.Basic
+import Belyi.Curve.Existence
 import Belyi.Curve.SmoothStalk
 import Belyi.Curve.Stalks
 import Belyi.Curve.ToP1
