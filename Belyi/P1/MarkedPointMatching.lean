@@ -173,6 +173,98 @@ lemma eq_span_of_forall_dvd {ℓ : MvPolynomial (Fin 2) K} {J : Ideal (MvPolynom
     (hdvd n _ (homogeneousComponent_isHomogeneous n f)
       (MvPolynomial.homogeneousComponent_mem_of_mem hhom hf n))
 
+/-!
+### Vanishing loci of the linear forms: `V(ℓ) = {pt}`
+
+Each marked point of `ℙ¹_K` is the unique point whose homogeneous prime contains the
+corresponding linear form.  These `V(ℓ) = {pt}` lemmas are the geometric heart of the reverse
+marked-point matching below, and are reusable on their own: e.g. `eq_infty_of_X1_mem` is the
+`V(X₁) = {∞}` identification consumed by the branch-locus analysis of the polynomial self-map
+(taxis issue #108, that `polynomialSelfMap g` fixes `∞`).
+-/
+
+/-- **`V(X₀) = {0}`.** A point of `ℙ¹_K` whose homogeneous prime contains `X₀` is the marked
+point `0`. -/
+lemma eq_zero_of_X0_mem {y : P1 K}
+    (hX0 : (X 0 : MvPolynomial (Fin 2) K) ∈ y.asHomogeneousIdeal.toIdeal) :
+    y = zero K := by
+  have hX1 : (X 1 : MvPolynomial (Fin 2) K) ∉ y.asHomogeneousIdeal.toIdeal :=
+    fun h1 => X01_not_both_mem y hX0 h1
+  have hspan : y.asHomogeneousIdeal.toIdeal = Ideal.span {(X 0 : MvPolynomial (Fin 2) K)} :=
+    eq_span_of_forall_dvd y.asHomogeneousIdeal.isHomogeneous (isHomogeneous_X K 0) hX0
+      (fun _ _ hw hwJ => dvd_of_isHomog_mem y.isPrime 0 1 (by decide) hX0 hX1 hw hwJ)
+  apply ProjectiveSpectrum.ext
+  apply HomogeneousIdeal.toIdeal_injective
+  rw [hspan, zero, mkPoint_asIdeal]
+
+/-- **`V(X₁) = {∞}`.** A point of `ℙ¹_K` whose homogeneous prime contains `X₁` is the marked
+point `∞`.  This is the `V(X₁) = {∞}` helper feeding the `polynomialSelfMap g` branch-locus
+analysis (taxis issue #108). -/
+lemma eq_infty_of_X1_mem {y : P1 K}
+    (hX1 : (X 1 : MvPolynomial (Fin 2) K) ∈ y.asHomogeneousIdeal.toIdeal) :
+    y = infty K := by
+  have hX0 : (X 0 : MvPolynomial (Fin 2) K) ∉ y.asHomogeneousIdeal.toIdeal :=
+    fun h0 => X01_not_both_mem y h0 hX1
+  have hspan : y.asHomogeneousIdeal.toIdeal = Ideal.span {(X 1 : MvPolynomial (Fin 2) K)} :=
+    eq_span_of_forall_dvd y.asHomogeneousIdeal.isHomogeneous (isHomogeneous_X K 1) hX1
+      (fun _ _ hw hwJ => dvd_of_isHomog_mem y.isPrime 1 0 (by decide) hX1 hX0 hw hwJ)
+  apply ProjectiveSpectrum.ext
+  apply HomogeneousIdeal.toIdeal_injective
+  rw [hspan, infty, mkPoint_asIdeal]
+
+/-- **`V(X₀ - X₁) = {1}`.** A point of `ℙ¹_K` whose homogeneous prime contains `X₀ - X₁` is the
+marked point `1`.  The divisibility skeleton for the linear form `X₀ - X₁` is reduced to the
+`X₀` case by the `shear` automorphism (`shear (X₀ - X₁) = X₀`). -/
+lemma eq_one_of_X0_sub_X1_mem {y : P1 K}
+    (hℓ : (X 0 - X 1 : MvPolynomial (Fin 2) K) ∈ y.asHomogeneousIdeal.toIdeal) :
+    y = one K := by
+  have hX1 : (X 1 : MvPolynomial (Fin 2) K) ∉ y.asHomogeneousIdeal.toIdeal := by
+    intro h1
+    have hX0 : (X 0 : MvPolynomial (Fin 2) K) ∈ y.asHomogeneousIdeal.toIdeal := by
+      have : (X 0 : MvPolynomial (Fin 2) K) = (X 0 - X 1) + X 1 := by ring
+      rw [this]; exact y.asHomogeneousIdeal.toIdeal.add_mem hℓ h1
+    exact X01_not_both_mem y hX0 h1
+  have hdvd : ∀ (n : ℕ) (hh : MvPolynomial (Fin 2) K), hh.IsHomogeneous n →
+      hh ∈ y.asHomogeneousIdeal.toIdeal → (X 0 - X 1 : MvPolynomial (Fin 2) K) ∣ hh := by
+    intro n w hw hwJ
+    have hsh : (shear K w).IsHomogeneous n := by
+      have h1 : (shear K w).IsHomogeneous (1 * n) :=
+        hw.aeval ![X 0 + X 1, X 1] (fun t => by
+          fin_cases t
+          · exact (isHomogeneous_X K 0).add (isHomogeneous_X K 1)
+          · exact isHomogeneous_X K 1)
+      rwa [one_mul] at h1
+    set c := (shear K w).coeff (Finsupp.single 1 n) with hc
+    obtain ⟨g, hg⟩ := X_dvd_sub hsh 0 1 (by decide)
+    rw [← hc] at hg
+    have hg' : w - C c * X 1 ^ n = (X 0 - X 1) * shearInv K g := by
+      have hcong := congrArg (shearInv K) hg
+      simp only [map_sub, map_mul, map_pow, shearInv_shear] at hcong
+      rw [show shearInv K (X 1) = X 1 by simp [shearInv],
+        show shearInv K (X 0) = X 0 - X 1 by simp [shearInv],
+        show shearInv K (C c) = C c by simp [shearInv, algebraMap_eq]] at hcong
+      exact hcong
+    have hmem : C c * X 1 ^ n ∈ y.asHomogeneousIdeal.toIdeal := by
+      have hrw : C c * X 1 ^ n = w - (X 0 - X 1) * shearInv K g := by rw [← hg']; ring
+      rw [hrw]
+      exact y.asHomogeneousIdeal.toIdeal.sub_mem hwJ
+        (y.asHomogeneousIdeal.toIdeal.mul_mem_right _ hℓ)
+    have hc0 : c = 0 := by
+      by_contra hcne
+      have hunit : IsUnit (C c : MvPolynomial (Fin 2) K) :=
+        (isUnit_iff_ne_zero.mpr hcne).map (C : K →+* MvPolynomial (Fin 2) K)
+      rcases y.isPrime.mem_or_mem hmem with hCc | hXpow
+      · exact y.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hCc hunit)
+      · exact hX1 (y.isPrime.mem_of_pow_mem n hXpow)
+    rw [hc0, map_zero, zero_mul, sub_zero] at hg'
+    exact ⟨shearInv K g, hg'⟩
+  have hspan : y.asHomogeneousIdeal.toIdeal = Ideal.span {(X 0 - X 1 : MvPolynomial (Fin 2) K)} :=
+    eq_span_of_forall_dvd y.asHomogeneousIdeal.isHomogeneous
+      ((isHomogeneous_X K 0).sub (isHomogeneous_X K 1)) hℓ hdvd
+  apply ProjectiveSpectrum.ext
+  apply HomogeneousIdeal.toIdeal_injective
+  rw [hspan, one, mkPoint_asIdeal]
+
 end Ideal
 
 section Reverse
@@ -214,32 +306,14 @@ lemma mapOfAlgebra_base_eq_zero {y : P1 K} (h : (mapOfAlgebra k₀ K).base y = z
     y = zero K := by
   have hcomap := comap_eq_of_base_eq k₀ K
     (ℓ₀ := X 0) (p := zero k₀) (by rw [zero, mkPoint_asIdeal]) h
-  have hX0 : (X 0 : MvPolynomial (Fin 2) K) ∈ y.asHomogeneousIdeal.toIdeal :=
-    X_mem_of_comap_eq k₀ K 0 hcomap
-  have hX1 : (X 1 : MvPolynomial (Fin 2) K) ∉ y.asHomogeneousIdeal.toIdeal :=
-    fun h1 => X01_not_both_mem y hX0 h1
-  have hspan : y.asHomogeneousIdeal.toIdeal = Ideal.span {(X 0 : MvPolynomial (Fin 2) K)} :=
-    eq_span_of_forall_dvd y.asHomogeneousIdeal.isHomogeneous (isHomogeneous_X K 0) hX0
-      (fun n w hw hwJ => dvd_of_isHomog_mem y.isPrime 0 1 (by decide) hX0 hX1 hw hwJ)
-  apply ProjectiveSpectrum.ext
-  apply HomogeneousIdeal.toIdeal_injective
-  rw [hspan, zero, mkPoint_asIdeal]
+  exact eq_zero_of_X0_mem (X_mem_of_comap_eq k₀ K 0 hcomap)
 
 /-- **Reverse marked-point matching at `∞`.** -/
 lemma mapOfAlgebra_base_eq_infty {y : P1 K} (h : (mapOfAlgebra k₀ K).base y = infty k₀) :
     y = infty K := by
   have hcomap := comap_eq_of_base_eq k₀ K
     (ℓ₀ := X 1) (p := infty k₀) (by rw [infty, mkPoint_asIdeal]) h
-  have hX1 : (X 1 : MvPolynomial (Fin 2) K) ∈ y.asHomogeneousIdeal.toIdeal :=
-    X_mem_of_comap_eq k₀ K 1 hcomap
-  have hX0 : (X 0 : MvPolynomial (Fin 2) K) ∉ y.asHomogeneousIdeal.toIdeal :=
-    fun h0 => X01_not_both_mem y h0 hX1
-  have hspan : y.asHomogeneousIdeal.toIdeal = Ideal.span {(X 1 : MvPolynomial (Fin 2) K)} :=
-    eq_span_of_forall_dvd y.asHomogeneousIdeal.isHomogeneous (isHomogeneous_X K 1) hX1
-      (fun n w hw hwJ => dvd_of_isHomog_mem y.isPrime 1 0 (by decide) hX1 hX0 hw hwJ)
-  apply ProjectiveSpectrum.ext
-  apply HomogeneousIdeal.toIdeal_injective
-  rw [hspan, infty, mkPoint_asIdeal]
+  exact eq_infty_of_X1_mem (X_mem_of_comap_eq k₀ K 1 hcomap)
 
 /-- **Reverse marked-point matching at `1`.** The linear form is `X₀ - X₁`; the divisibility
 skeleton is reduced to the `X₀` case by the `shear` automorphism (`shear (X₀ - X₁) = X₀`). -/
@@ -254,57 +328,7 @@ lemma mapOfAlgebra_base_eq_one {y : P1 K} (h : (mapOfAlgebra k₀ K).base y = on
       rw [hcomap]; exact Ideal.mem_span_singleton_self _
     rw [Ideal.mem_comap] at hmem
     simpa using hmem
-  -- `X₁ ∉ J` (else `X₀ = (X₀ - X₁) + X₁ ∈ J` too)
-  have hX1 : (X 1 : MvPolynomial (Fin 2) K) ∉ y.asHomogeneousIdeal.toIdeal := by
-    intro h1
-    have hX0 : (X 0 : MvPolynomial (Fin 2) K) ∈ y.asHomogeneousIdeal.toIdeal := by
-      have : (X 0 : MvPolynomial (Fin 2) K) = (X 0 - X 1) + X 1 := by ring
-      rw [this]; exact y.asHomogeneousIdeal.toIdeal.add_mem hℓ h1
-    exact X01_not_both_mem y hX0 h1
-  -- divisibility skeleton for `X₀ - X₁` via `shear`
-  have hdvd : ∀ (n : ℕ) (hh : MvPolynomial (Fin 2) K), hh.IsHomogeneous n →
-      hh ∈ y.asHomogeneousIdeal.toIdeal → (X 0 - X 1 : MvPolynomial (Fin 2) K) ∣ hh := by
-    intro n w hw hwJ
-    -- `shear w` is homogeneous of the same degree
-    have hsh : (shear K w).IsHomogeneous n := by
-      have h1 : (shear K w).IsHomogeneous (1 * n) :=
-        hw.aeval ![X 0 + X 1, X 1] (fun t => by
-          fin_cases t
-          · exact (isHomogeneous_X K 0).add (isHomogeneous_X K 1)
-          · exact isHomogeneous_X K 1)
-      rwa [one_mul] at h1
-    set c := (shear K w).coeff (Finsupp.single 1 n) with hc
-    -- `X₀ ∣ shear w - c·X₁ⁿ`
-    obtain ⟨g, hg⟩ := X_dvd_sub hsh 0 1 (by decide)
-    rw [← hc] at hg
-    -- transport back through `shearInv`
-    have hg' : w - C c * X 1 ^ n = (X 0 - X 1) * shearInv K g := by
-      have hcong := congrArg (shearInv K) hg
-      simp only [map_sub, map_mul, map_pow, shearInv_shear] at hcong
-      rw [show shearInv K (X 1) = X 1 by simp [shearInv],
-        show shearInv K (X 0) = X 0 - X 1 by simp [shearInv],
-        show shearInv K (C c) = C c by simp [shearInv, algebraMap_eq]] at hcong
-      exact hcong
-    have hmem : C c * X 1 ^ n ∈ y.asHomogeneousIdeal.toIdeal := by
-      have hrw : C c * X 1 ^ n = w - (X 0 - X 1) * shearInv K g := by rw [← hg']; ring
-      rw [hrw]
-      exact y.asHomogeneousIdeal.toIdeal.sub_mem hwJ
-        (y.asHomogeneousIdeal.toIdeal.mul_mem_right _ hℓ)
-    have hc0 : c = 0 := by
-      by_contra hcne
-      have hunit : IsUnit (C c : MvPolynomial (Fin 2) K) :=
-        (isUnit_iff_ne_zero.mpr hcne).map (C : K →+* MvPolynomial (Fin 2) K)
-      rcases y.isPrime.mem_or_mem hmem with hCc | hXpow
-      · exact y.isPrime.ne_top (Ideal.eq_top_of_isUnit_mem _ hCc hunit)
-      · exact hX1 (y.isPrime.mem_of_pow_mem n hXpow)
-    rw [hc0, map_zero, zero_mul, sub_zero] at hg'
-    exact ⟨shearInv K g, hg'⟩
-  have hspan : y.asHomogeneousIdeal.toIdeal = Ideal.span {(X 0 - X 1 : MvPolynomial (Fin 2) K)} :=
-    eq_span_of_forall_dvd y.asHomogeneousIdeal.isHomogeneous
-      ((isHomogeneous_X K 0).sub (isHomogeneous_X K 1)) hℓ hdvd
-  apply ProjectiveSpectrum.ext
-  apply HomogeneousIdeal.toIdeal_injective
-  rw [hspan, one, mkPoint_asIdeal]
+  exact eq_one_of_X0_sub_X1_mem hℓ
 
 /-- **Marked-point matching.** Every point of `ℙ¹_K` lying over a marked point of `ℙ¹_{k₀}`
 under the base-change map is itself a marked point of `ℙ¹_K`. This is the hypothesis of
