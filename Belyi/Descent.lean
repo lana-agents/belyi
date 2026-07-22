@@ -42,8 +42,10 @@ tracker #200.)
 
 ## Main statements
 
-* `Belyi.spreadOut_isotrivial_point`: **sanctioned axiom** (B11 input) — a `SpreadOut`
-  family with finitely many fibre iso-classes descends its pair to `ℚ̄`.
+* `Belyi.spreadOut_isotrivial_point`: **sanctioned axiom** (B11 input) — a Belyi pair
+  (`hf : IsBelyiMap K f`, `X` a curve) with a `SpreadOut` family and finitely many fibre
+  iso-classes descends to `ℚ̄`. The `IsBelyiMap`/`IsCurveOver` hypotheses are what make this
+  a *true* isolated statement (see the axiom's soundness note).
 * `Belyi.definableOverPair_of_spreadOut` (B11): the proved wrapper feeding
   `rigidity_finiteness` into the axiom.
 * `Belyi.definableOverPair_of_isBelyiMap` (**B12**, pair version): a Belyi pair over `ℂ` is
@@ -64,23 +66,33 @@ namespace Belyi
 
 open AlgebraicGeometry CategoryTheory
 
-/-- **B11 input (isom-scheme / isotriviality), axiomatized.** Given a `SpreadOut` family
-for a Belyi pair `(X, f)` over `K = ℂ`, together with the finiteness of iso-classes of its
-degree-`≤ d` Belyi fibres (supplied by B9, `rigidity_finiteness k S.d`), the family is
-isotrivial on a dense open, so a closed `ℚ̄`-point realises the geometric generic fibre and
-`(X, f)` descends to `ℚ̄`: it is `DefinableOverPair k K X f`.
+/-- **B11 input (isom-scheme / isotriviality), axiomatized.** Given a Belyi pair `(X, f)`
+over `K = ℂ` (with `X` a curve, `hf : IsBelyiMap K f`) spread out to a `SpreadOut` family,
+together with the finiteness of iso-classes of its degree-`≤ d` Belyi fibres (supplied by
+B9, `rigidity_finiteness k S.d`), the family is isotrivial on a dense open, so a closed
+`ℚ̄`-point realises the geometric generic fibre and `(X, f)` descends to `ℚ̄`: it is
+`DefinableOverPair k K X f`.
 
 This isolates the single consequence of [Koeck2004, Thm 2.2] that B11 needs — the
 finite-type isomorphism scheme with constructible (Chevalley) image — which is absent from
 mathlib v4.32 (`references/converse-design.md` §4). It is the third and last sanctioned
 axiom of the converse direction, alongside `rigidity_finiteness` (B9) and `belyi_spreadOut`
-(B10(ii)). The finiteness hypothesis `hfin` is stated explicitly so that removing this axiom
-reduces exactly to the pigeonhole `Finite (BelyiCover.Iso k d) ⇒ isotriviality` (taxis
-#199). -/
+(B10(ii)).
+
+**Soundness note.** The hypotheses `[IsCurveOver K X]` and `hf : IsBelyiMap K f` are
+essential: they are precisely what make this axiom a *true* isolated statement (Belyi's
+converse — every Belyi pair over `ℂ` descends to `ℚ̄`). Without them the axiom would apply
+to an arbitrary morphism `f`, which is false: the current `SpreadOut` structure is *carrier
+data* whose fields do not themselves constrain `(X, f)` (the honest generic-fibre-over-`ℚ̄(V)`
+tie needs mathlib-absent infrastructure — this is what the de-axiomatization trackers #199
+/#200 restore), so the mathematical content "`(X, f)` is Belyi" must be carried by `hf`
+rather than by `S`. The finiteness hypothesis `hfin` is stated explicitly so that removing
+this axiom reduces exactly to the pigeonhole `Finite (BelyiCover.Iso k d) ⇒ isotriviality`
+(taxis #199). -/
 axiom spreadOut_isotrivial_point (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
     [Algebra.IsAlgebraic ℚ k] [Field K] [IsAlgClosed K] [CharZero K] [Algebra k K]
-    {X : Scheme.{u}} [X.Over (Spec (CommRingCat.of K))] {f : X ⟶ P1 K}
-    (S : SpreadOut k K X f) (hfin : Finite (BelyiCover.Iso k S.d)) :
+    {X : Scheme.{u}} [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X] {f : X ⟶ P1 K}
+    (hf : IsBelyiMap K f) (S : SpreadOut k K X f) (hfin : Finite (BelyiCover.Iso k S.d)) :
     DefinableOverPair k K X f
 
 /-- **B11 (rigidity/isotriviality), proved wrapper.** A spread-out Belyi pair is definable
@@ -88,9 +100,9 @@ over `ℚ̄`, obtained by feeding the finiteness of iso-classes of degree-`≤ d
 (B9, `rigidity_finiteness`) into `spreadOut_isotrivial_point`. -/
 theorem definableOverPair_of_spreadOut (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
     [Algebra.IsAlgebraic ℚ k] [Field K] [IsAlgClosed K] [CharZero K] [Algebra k K]
-    {X : Scheme.{u}} [X.Over (Spec (CommRingCat.of K))] {f : X ⟶ P1 K}
-    (S : SpreadOut k K X f) : DefinableOverPair k K X f :=
-  spreadOut_isotrivial_point k K S (rigidity_finiteness k S.d)
+    {X : Scheme.{u}} [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X] {f : X ⟶ P1 K}
+    (hf : IsBelyiMap K f) (S : SpreadOut k K X f) : DefinableOverPair k K X f :=
+  spreadOut_isotrivial_point k K hf S (rigidity_finiteness k S.d)
 
 /-- **B12 (converse of Belyi's theorem), pair version.** A Belyi pair `(X, f)` over `K = ℂ`
 (with `X` a curve) is definable over `ℚ̄ = k`: there is a model `f₀ : X₀ ⟶ ℙ¹_{ℚ̄}` whose
@@ -104,7 +116,7 @@ theorem definableOverPair_of_isBelyiMap (k K : Type u) [Field k] [IsAlgClosed k]
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X]
     (f : X ⟶ P1 K) (hf : IsBelyiMap K f) : DefinableOverPair k K X f := by
   obtain ⟨S⟩ := belyi_spreadOut k K X f hf
-  exact definableOverPair_of_spreadOut k K S
+  exact definableOverPair_of_spreadOut k K hf S
 
 /-- **B12 (converse of Belyi's theorem), scheme version.** A curve `X` over `K = ℂ` that
 admits a Belyi map is definable over `ℚ̄ = k`.
