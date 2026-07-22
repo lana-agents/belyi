@@ -55,4 +55,5 @@ import Belyi.Polynomial.ReductionZeroOne
 import Belyi.Ramification
 import Belyi.RamificationBaseChange
 import Belyi.RationalMap
+import Belyi.Rigidity
 import Belyi.RigidityGroupTheory
