@@ -36,6 +36,7 @@ import Belyi.P1.PolynomialMap
 import Belyi.P1.PolynomialMapImage
 import Belyi.P1.PolynomialMapInfty
 import Belyi.P1.Transcendental
+import Belyi.Polynomial.ChartEtale
 import Belyi.Polynomial.CritVal
 import Belyi.Polynomial.DerivativeSmoothLocus
 import Belyi.Polynomial.Lambda
