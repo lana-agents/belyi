@@ -18,6 +18,7 @@ import Belyi.Forward
 import Belyi.FunctionField
 import Belyi.KaehlerRank
 import Belyi.Marked
+import Belyi.MarkedBaseChange
 import Belyi.P1
 import Belyi.P1.AffineChart
 import Belyi.P1.AffineChart0
