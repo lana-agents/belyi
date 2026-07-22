@@ -60,4 +60,5 @@ import Belyi.RamificationBaseChange
 import Belyi.RationalMap
 import Belyi.Rigidity
 import Belyi.RigidityGroupTheory
+import Belyi.SpecFiniteTypeLimit
 import Belyi.SpreadOut
