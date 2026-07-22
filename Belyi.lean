@@ -27,6 +27,7 @@ import Belyi.P1.BelyiMapBaseChange
 import Belyi.P1.ChartCoord
 import Belyi.P1.ChartInjective
 import Belyi.P1.ChartTransition
+import Belyi.P1.ClosedPoints
 import Belyi.P1.Curve
 import Belyi.P1.MarkedPointMatching
 import Belyi.P1.Points
