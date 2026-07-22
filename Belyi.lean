@@ -25,6 +25,7 @@ import Belyi.P1.BaseChange
 import Belyi.P1.BaseChangeIso
 import Belyi.P1.BaseChangeTransport
 import Belyi.P1.BelyiMapBaseChange
+import Belyi.P1.BranchExtraction
 import Belyi.P1.ChartCoord
 import Belyi.P1.ChartInjective
 import Belyi.P1.ChartTransition
