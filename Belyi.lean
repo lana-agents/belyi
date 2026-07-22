@@ -34,6 +34,7 @@ import Belyi.P1.MarkedPointMatching
 import Belyi.P1.Points
 import Belyi.P1.PointsBaseChange
 import Belyi.P1.PolynomialBranchLocus
+import Belyi.P1.PolynomialBranchMarked
 import Belyi.P1.PolynomialFinite
 import Belyi.P1.PolynomialMap
 import Belyi.P1.PolynomialMapBranch
