@@ -33,6 +33,7 @@ import Belyi.P1.Points
 import Belyi.P1.PointsBaseChange
 import Belyi.P1.PolynomialFinite
 import Belyi.P1.PolynomialMap
+import Belyi.P1.PolynomialMapBranch
 import Belyi.P1.PolynomialMapImage
 import Belyi.P1.PolynomialMapInfty
 import Belyi.P1.Transcendental
