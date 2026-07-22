@@ -43,6 +43,7 @@ import Belyi.Polynomial.ChartEtale
 import Belyi.Polynomial.CritVal
 import Belyi.Polynomial.DerivativeSmoothLocus
 import Belyi.Polynomial.Lambda
+import Belyi.Polynomial.ReductionCombined
 import Belyi.Polynomial.ReductionRational
 import Belyi.Polynomial.ReductionZeroOne
 import Belyi.Ramification
