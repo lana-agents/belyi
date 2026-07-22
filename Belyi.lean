@@ -15,6 +15,7 @@ import Belyi.DefinablePairFinite
 import Belyi.DefinablePairTower
 import Belyi.Dimension
 import Belyi.Forward
+import Belyi.ForwardPair
 import Belyi.FunctionField
 import Belyi.KaehlerRank
 import Belyi.Marked
