@@ -13,6 +13,7 @@ import Belyi.Definable
 import Belyi.DefinablePair
 import Belyi.DefinablePairFinite
 import Belyi.DefinablePairTower
+import Belyi.Descent
 import Belyi.Dimension
 import Belyi.Forward
 import Belyi.ForwardPair
