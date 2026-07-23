@@ -20,6 +20,7 @@ import Belyi.ForwardPair
 import Belyi.FunctionField
 import Belyi.KaehlerRank
 import Belyi.Marked
+import Belyi.Main
 import Belyi.MarkedBaseChange
 import Belyi.MarkedPair
 import Belyi.P1
