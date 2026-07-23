@@ -7,6 +7,7 @@ import Belyi.Curve.BaseChange
 import Belyi.Curve.Basic
 import Belyi.Curve.Descent
 import Belyi.Curve.Existence
+import Belyi.Curve.GeometricIntegralDescent
 import Belyi.Curve.SmoothStalk
 import Belyi.Curve.Stalks
 import Belyi.Curve.ToP1
