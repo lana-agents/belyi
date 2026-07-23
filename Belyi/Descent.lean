@@ -88,12 +88,18 @@ tie needs mathlib-absent infrastructure — this is what the de-axiomatization t
 /#200 restore), so the mathematical content "`(X, f)` is Belyi" must be carried by `hf`
 rather than by `S`. The finiteness hypothesis `hfin` is stated explicitly so that removing
 this axiom reduces exactly to the pigeonhole `Finite (BelyiCover.Iso k d) ⇒ isotriviality`
-(taxis #199). -/
-axiom spreadOut_isotrivial_point (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
+(taxis #199).
+
+Per taxis #201 this is stated as a `theorem` with `sorry` rather than an `axiom`, so that
+the outstanding proof obligation is surfaced honestly (`sorryAx` in `#print axioms`, a
+`sorry` warning at build) and tracked as a concrete goal. The proof is the research-grade
+isomorphism-scheme / Chevalley-constructibility content scoped in issues #199 (the provable
+pigeonhole nugget) and #200 (the full de-axiomatization). -/
+theorem spreadOut_isotrivial_point (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
     [Algebra.IsAlgebraic ℚ k] [Field K] [IsAlgClosed K] [CharZero K] [Algebra k K]
     {X : Scheme.{u}} [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X] {f : X ⟶ P1 K}
     (hf : IsBelyiMap K f) (S : SpreadOut k K X f) (hfin : Finite (BelyiCover.Iso k S.d)) :
-    DefinableOverPair k K X f
+    DefinableOverPair k K X f := sorry
 
 /-- **B11 (rigidity/isotriviality), proved wrapper.** A spread-out Belyi pair is definable
 over `ℚ̄`, obtained by feeding the finiteness of iso-classes of degree-`≤ d` Belyi covers

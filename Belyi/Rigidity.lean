@@ -133,9 +133,14 @@ Justification (NOT formalized — this is the Riemann-existence content the proj
 to build against mathlib v4.32, see `references/rigidity-design.md`): such covers
 correspond to finite `F₂`-sets of cardinality `≤ d`, and a finitely generated group has
 only finitely many subgroups of bounded index
-(`Belyi.finite_boundedIndex_subgroups_freeGroupTwo`, issue #52b). This is the single
-sanctioned axiom of the project, isolated in this file. -/
-axiom rigidity_finiteness (k : Type u) [Field k] [IsAlgClosed k] [CharZero k] (d : ℕ) :
-    Finite (BelyiCover.Iso k d)
+(`Belyi.finite_boundedIndex_subgroups_freeGroupTwo`, issue #52b).
+
+Per taxis #201 this is stated as a `theorem` with `sorry` rather than an `axiom`, so that
+the outstanding proof obligation is surfaced honestly (it shows up as `sorryAx` in
+`#print axioms` and as a `sorry` warning) and tracked as a concrete goal. The proof is the
+research-grade rigidity content scoped in issue #194 (de-axiomatize B9); see
+`references/rigidity-design.md`. -/
+theorem rigidity_finiteness (k : Type u) [Field k] [IsAlgClosed k] [CharZero k] (d : ℕ) :
+    Finite (BelyiCover.Iso k d) := sorry
 
 end Belyi

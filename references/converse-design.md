@@ -9,6 +9,16 @@ into child issues. It is a proposal for maintainer sign-off before any large-sca
 work, and it mirrors the shape of the already-approved `references/rigidity-design.md`
 (the analogous first deliverable of #52).
 
+> **Update (taxis #201).** Where this document says "axiom" / "axiomatize", each input is
+> now stated in Lean as a `theorem … := sorry` rather than an `axiom`, so the outstanding
+> obligations are surfaced honestly (`sorryAx` in `#print axioms`, a `sorry` warning at
+> build) instead of asserted. The mathematical boundary is unchanged. The three inputs are
+> `rigidity_finiteness` (B9, `Belyi/Rigidity.lean`), `belyi_spreadOut` (B10(ii),
+> `Belyi/SpreadOut.lean`) and `spreadOut_isotrivial_point` (B11, `Belyi/Descent.lean`),
+> tracked by issues **#194**, **#200** and **#199/#200** respectively. The build gate
+> (`.orchestra/validation.sh`) was made sorry-aware: it rejects any `sorry` outside these
+> three sanctioned files.
+
 ## 0. TL;DR of the decision
 
 * The converse rests on **three** pieces of infrastructure that are genuinely far from

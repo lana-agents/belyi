@@ -7,6 +7,14 @@ issue's first deliverable: it fixes *what is proved vs. what is axiomatized*, th
 Lean statement of the axiomatized core, and the split into child issues. It is a
 proposal for maintainer sign-off before any large-scale proof work begins.
 
+> **Update (taxis #201).** Where this document says "axiom" / "axiomatize", the input
+> is now stated in Lean as a `theorem … := sorry` rather than an `axiom`. This surfaces
+> the outstanding obligation honestly — it appears as `sorryAx` in `#print axioms` and as
+> a `sorry` warning at build — instead of asserting it. The mathematical boundary is
+> unchanged; only the Lean form is. `rigidity_finiteness` (B9) lives in `Belyi/Rigidity.lean`
+> and its proof is tracked by issue **#194**. The build gate (`.orchestra/validation.sh`)
+> was made sorry-aware: it rejects any `sorry` outside the three sanctioned files.
+
 ## 0. TL;DR of the decision
 
 * **Axiomatize** the geometry-to-group-theory bridge (Riemann existence + finite

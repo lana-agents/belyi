@@ -110,10 +110,15 @@ stay smooth proper curves with finite maps to `ℙ¹` branched only over `{0, 1,
 (openness of the good-fibre locus) produces the family. This is one of the two sanctioned
 axioms of the converse direction, isolated in this file, alongside `rigidity_finiteness`
 (B9) and `spreadOut_isotrivial_point` (B11, `Belyi/Descent.lean`). Nothing on the forward
-direction depends on this file. -/
-axiom belyi_spreadOut (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
+direction depends on this file.
+
+Per taxis #201 this is stated as a `theorem` with `sorry` rather than an `axiom`, so that
+the outstanding proof obligation is surfaced honestly (`sorryAx` in `#print axioms`, a
+`sorry` warning at build) and tracked as a concrete goal. The proof is the research-grade
+EGA IV spreading-out content scoped in issue #200 (de-axiomatize B10(ii)/B11). -/
+theorem belyi_spreadOut (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
     [Algebra.IsAlgebraic ℚ k] [Field K] [IsAlgClosed K] [CharZero K] [Algebra k K]
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X]
-    (f : X ⟶ P1 K) (hf : IsBelyiMap K f) : Nonempty (SpreadOut k K X f)
+    (f : X ⟶ P1 K) (hf : IsBelyiMap K f) : Nonempty (SpreadOut k K X f) := sorry
 
 end Belyi
