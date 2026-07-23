@@ -76,6 +76,11 @@ We therefore provide two forms of the equivalence:
 * `Belyi.belyi_iff_of_descendsAlong` (**B14**) — Belyi's theorem as an `↔`, with the forward
   implication discharged internally and gated only on the single smooth-descent instance
   (taxis #205); fully ungated the moment that instance lands globally.
+* `Belyi.definableOver_baseChangeAlgEquiv` / `Belyi.exists_isBelyiMap_baseChangeAlgEquiv`
+  (**B14 item 3**) — both sides of Belyi's theorem are invariant under base change of the source
+  along a `k`-algebra automorphism `σ` of `K` (Galois conjugation): a definable curve `X` and
+  its conjugate `X^σ` share the same `k`-model (`Belyi.baseChangeConjIso`), hence are
+  isomorphic over `Spec K`, so definability and admitting a Belyi map transport across.
 * Marked re-exports (**B14c**): `Belyi.exists_isBelyiMap_marked_of_isCurveOver` and
   `Belyi.exists_definableOverPair_isBelyiMap_marked_baseChange_of_isCurveOver` are made
   reachable through this single import target for downstream marked-curve work.
@@ -189,5 +194,110 @@ theorem belyi_iff_of_descendsAlong (k K : Type u) [Field k] [IsAlgClosed k] [Cha
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X] :
     DefinableOver k K X ↔ ∃ f : X ⟶ P1 K, IsBelyiMap K f :=
   ⟨exists_isBelyiMap_of_definableOver k K X, belyi_converse k K X⟩
+
+/-! ## B14 (item 3): invariance under base change along a `k`-automorphism of `K`
+
+The parent issue asks for "invariance under base change/isomorphism". `exists_isBelyiMap_congr`
+and `definableOver_congr` above record invariance under isomorphism of the source curve
+(**B14a**). This section records invariance under **base change of the source along a
+`k`-algebra automorphism `σ` of `K`** — the Galois-conjugation action in the relevant setting.
+
+The mathematical content is the honest observation that *definability forces Galois
+invariance*: because `σ` fixes `k`, the spectrum map `Spec.map σ` is compatible with the
+structure map `Spec K ⟶ Spec k` (`specAlgebraMap_algEquiv_comp`), so the `σ`-conjugate of a
+scheme with a `k`-model has the **same** `k`-model (`baseChangeConjIso`). Hence the conjugate
+scheme is isomorphic to the original over `Spec K`, and both sides of `belyi_iff` are invariant
+(`definableOver_baseChangeAlgEquiv`, `exists_isBelyiMap_baseChangeAlgEquiv`). -/
+
+/-- The spectrum map of a `k`-algebra automorphism `σ` of `K` is compatible with the structure
+morphism `Spec K ⟶ Spec k₀`: precomposing `specAlgebraMap k₀ K` with `Spec.map σ` leaves it
+unchanged, because `σ` fixes `k₀` (`AlgEquiv.commutes`). -/
+lemma specAlgebraMap_algEquiv_comp (k₀ K : Type u) [CommRing k₀] [CommRing K] [Algebra k₀ K]
+    (σ : K ≃ₐ[k₀] K) :
+    Spec.map (CommRingCat.ofHom (σ : K →+* K)) ≫ specAlgebraMap k₀ K = specAlgebraMap k₀ K := by
+  rw [specAlgebraMap, ← Spec.map_comp, ← CommRingCat.ofHom_comp]
+  congr 2
+  exact RingHom.ext fun x => σ.commutes x
+
+/-- The base change of a scheme `X` over `Spec K` along a `k₀`-algebra automorphism `σ` of `K`
+(its **Galois conjugate** `X^σ`): the pullback of the structure morphism `X ↘ Spec K` along
+`Spec.map σ`. -/
+noncomputable def baseChangeAlgEquiv (k₀ K : Type u) [CommRing k₀] [CommRing K] [Algebra k₀ K]
+    (σ : K ≃ₐ[k₀] K) (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] : Scheme.{u} :=
+  pullback (X ↘ Spec (CommRingCat.of K)) (Spec.map (CommRingCat.ofHom (σ : K →+* K)))
+
+/-- `baseChangeAlgEquiv σ X` is a scheme over `Spec K` via the second projection. -/
+noncomputable instance (k₀ K : Type u) [CommRing k₀] [CommRing K] [Algebra k₀ K]
+    (σ : K ≃ₐ[k₀] K) (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] :
+    (baseChangeAlgEquiv k₀ K σ X).Over (Spec (CommRingCat.of K)) :=
+  ⟨pullback.snd _ _⟩
+
+section Conjugate
+
+variable (k₀ K : Type u) [CommRing k₀] [CommRing K] [Algebra k₀ K] (σ : K ≃ₐ[k₀] K)
+  (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))]
+  {X₀ : Scheme.{u}} (f₀ : X₀ ⟶ Spec (CommRingCat.of k₀))
+  (e : X ≅ pullback f₀ (specAlgebraMap k₀ K))
+  (he : e.hom ≫ pullback.snd f₀ (specAlgebraMap k₀ K) = X ↘ Spec (CommRingCat.of K))
+
+include e he
+
+/-- Left-leg iso: replace the left leg `X ↘ Spec K = e.hom ≫ pullback.snd f₀ q` of
+`baseChangeAlgEquiv σ X = pullback (X ↘ Spec K) (Spec.map σ)` by the isomorphism `e.hom`. -/
+noncomputable def conjLegIso :
+    baseChangeAlgEquiv k₀ K σ X ≅ pullback (pullback.snd f₀ (specAlgebraMap k₀ K))
+      (Spec.map (CommRingCat.ofHom (σ : K →+* K))) := by
+  have e₁ : (X ↘ Spec (CommRingCat.of K)) ≫ 𝟙 _ =
+      e.hom ≫ pullback.snd f₀ (specAlgebraMap k₀ K) := by rw [Category.comp_id, ← he]
+  have e₂ : (Spec.map (CommRingCat.ofHom (σ : K →+* K))) ≫ 𝟙 _ =
+      𝟙 _ ≫ Spec.map (CommRingCat.ofHom (σ : K →+* K)) := by rw [Category.comp_id, Category.id_comp]
+  have himap : IsIso (pullback.map (X ↘ Spec (CommRingCat.of K))
+      (Spec.map (CommRingCat.ofHom (σ : K →+* K))) (pullback.snd f₀ (specAlgebraMap k₀ K))
+      (Spec.map (CommRingCat.ofHom (σ : K →+* K))) e.hom (𝟙 _) (𝟙 _) e₁ e₂) :=
+    pullback.map_isIso _ _ _ _ e.hom (𝟙 _) (𝟙 _) e₁ e₂
+  exact @asIso _ _ _ _ _ himap
+
+/-- The isomorphism `baseChangeAlgEquiv σ X ≅ X₀ ×_{k₀} K` built from an explicit `k₀`-model
+`(X₀, f₀, e)` of `X`. Since `σ` fixes `k₀`, base change along `Spec.map σ` acts trivially on the
+model: `Spec.map σ ≫ specAlgebraMap k₀ K = specAlgebraMap k₀ K`. Data helper for
+`definableOver_baseChangeAlgEquiv` / `exists_isBelyiMap_baseChangeAlgEquiv`. -/
+noncomputable def baseChangeConjIso :
+    baseChangeAlgEquiv k₀ K σ X ≅ pullback f₀ (specAlgebraMap k₀ K) :=
+  conjLegIso k₀ K σ X f₀ e he ≪≫
+    pullbackLeftPullbackSndIso f₀ (specAlgebraMap k₀ K)
+        (Spec.map (CommRingCat.ofHom (σ : K →+* K))) ≪≫
+      pullback.congrHom rfl (specAlgebraMap_algEquiv_comp k₀ K σ)
+
+/-- `baseChangeConjIso` is compatible with the structure morphisms to `Spec K`. -/
+lemma baseChangeConjIso_hom_snd :
+    (baseChangeConjIso k₀ K σ X f₀ e he).hom ≫ pullback.snd f₀ (specAlgebraMap k₀ K) =
+      pullback.snd (X ↘ Spec (CommRingCat.of K))
+        (Spec.map (CommRingCat.ofHom (σ : K →+* K))) := by
+  simp only [baseChangeConjIso, conjLegIso, Iso.trans_hom, asIso_hom, Category.assoc]
+  rw [pullback.congrHom_hom, pullback.lift_snd, Category.comp_id,
+    pullbackLeftPullbackSndIso_hom_snd]
+  erw [pullback.lift_snd]
+  rw [Category.comp_id]
+
+end Conjugate
+
+/-- **B14 (item 3), definability side.** Being definable over `k₀` is invariant under base change
+along a `k₀`-automorphism `σ` of `K`. -/
+theorem definableOver_baseChangeAlgEquiv (k₀ K : Type u) [CommRing k₀] [CommRing K]
+    [Algebra k₀ K] (σ : K ≃ₐ[k₀] K) (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))]
+    (h : DefinableOver k₀ K X) : DefinableOver k₀ K (baseChangeAlgEquiv k₀ K σ X) := by
+  obtain ⟨X₀, f₀, e, he⟩ := h
+  exact ⟨X₀, f₀, baseChangeConjIso k₀ K σ X f₀ e he, baseChangeConjIso_hom_snd k₀ K σ X f₀ e he⟩
+
+/-- **B14 (item 3), Belyi side.** For a curve `X` over `K` definable over `k₀`, admitting a
+Belyi map is invariant under base change along a `k₀`-automorphism `σ` of `K` (the conjugate
+scheme is isomorphic to `X`, so `exists_isBelyiMap_congr` applies). -/
+theorem exists_isBelyiMap_baseChangeAlgEquiv (k₀ K : Type u) [CommRing k₀] [Field K]
+    [Algebra k₀ K] (σ : K ≃ₐ[k₀] K) (X : Scheme.{u})
+    [X.Over (Spec (CommRingCat.of K))] (h : DefinableOver k₀ K X) :
+    (∃ f : baseChangeAlgEquiv k₀ K σ X ⟶ P1 K, IsBelyiMap K f) ↔
+      (∃ f : X ⟶ P1 K, IsBelyiMap K f) := by
+  obtain ⟨X₀, f₀, e, he⟩ := h
+  exact exists_isBelyiMap_congr K (baseChangeConjIso k₀ K σ X f₀ e he ≪≫ e.symm)
 
 end Belyi
