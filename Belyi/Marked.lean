@@ -110,7 +110,7 @@ theorem exists_isBelyiMap_marked_of_isCurveOver
   classical
   -- B1: a finite surjective cover `f₀ : X ⟶ ℙ¹_k`.
   haveI : IsIntegral X := IsCurveOver.isIntegral k X
-  obtain ⟨f₀, hf₀fin, hf₀surj⟩ := exists_isFinite_surjective_hom_to_P1 k X
+  obtain ⟨f₀, hf₀fin, hf₀surj, -⟩ := exists_isFinite_surjective_hom_to_P1 k X
   haveI : IsFinite f₀ := hf₀fin
   haveI : IsDominant f₀ := ⟨hf₀surj.denseRange⟩
   haveI : IsNoetherian (P1 k) := isNoetherian_of_over (P1 k) (Spec (CommRingCat.of k))

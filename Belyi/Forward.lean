@@ -67,11 +67,12 @@ polynomial self-map attached to the reduction polynomial `ĝ = g.map (algebraMap
 theorem exists_isBelyiMap_of_isCurveOver
     (k : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of k))] [IsCurveOver k X] :
-    ∃ f : X ⟶ P1 k, IsBelyiMap k f := by
+    ∃ f : X ⟶ P1 k, IsBelyiMap k f ∧ f.IsOver (Spec (CommRingCat.of k)) := by
   classical
-  -- B1: a finite surjective cover `f₀ : X ⟶ ℙ¹_k`.
+  -- B1: a finite surjective cover `f₀ : X ⟶ ℙ¹_k`, itself a `k`-morphism.
   haveI : IsIntegral X := IsCurveOver.isIntegral k X
-  obtain ⟨f₀, hf₀fin, hf₀surj⟩ := exists_isFinite_surjective_hom_to_P1 k X
+  obtain ⟨f₀, hf₀fin, hf₀surj, hf₀over⟩ := exists_isFinite_surjective_hom_to_P1 k X
+  haveI : f₀.IsOver (Spec (CommRingCat.of k)) := hf₀over
   haveI : IsFinite f₀ := hf₀fin
   -- Instances the branch-extraction API consumes.
   haveI : IsDominant f₀ := ⟨hf₀surj.denseRange⟩
@@ -89,7 +90,12 @@ theorem exists_isBelyiMap_of_isCurveOver
   have hd : 0 < (g.map (algebraMap ℚ k)).natDegree := by
     rw [Polynomial.natDegree_map_eq_of_injective hinj]
     exact Nat.pos_of_ne_zero hgne
-  refine ⟨f₀ ≫ P1.polynomialSelfMap k (g.map (algebraMap ℚ k)) hd, ?_⟩
+  -- The polynomial self-map of `ℙ¹` is a `k`-morphism, so the composite is too.
+  haveI : (P1.polynomialSelfMap k (g.map (algebraMap ℚ k)) hd).IsOver
+      (Spec (CommRingCat.of k)) :=
+    ⟨by rw [P1.structMap_eq]
+        exact P1.polynomialSelfMap_structMap k (g.map (algebraMap ℚ k)) hd⟩
+  refine ⟨f₀ ≫ P1.polynomialSelfMap k (g.map (algebraMap ℚ k)) hd, ?_, inferInstance⟩
   -- B4/B5: the composite is a Belyi map.
   refine P1.isBelyiMap_comp_polynomialSelfMap k (g.map (algebraMap ℚ k)) hd f₀ ?_ ?_
   · -- `polynomialSelfMap ĝ '' Branch f₀ ⊆ {0,1,∞}` (#187), from `g(S) ⊆ {0,1}`.
@@ -115,7 +121,7 @@ theorem exists_isBelyiMap_baseChange_of_isCurveOver
     (K : Type u) [Field K] [Algebra k K]
     (X₀ : Scheme.{u}) [X₀.Over (Spec (CommRingCat.of k))] [IsCurveOver k X₀] :
     ∃ (Y : Scheme.{u}) (f : Y ⟶ P1 K), IsBelyiMap K f := by
-  obtain ⟨f₀, hf₀⟩ := exists_isBelyiMap_of_isCurveOver k X₀
+  obtain ⟨f₀, hf₀, -⟩ := exists_isBelyiMap_of_isCurveOver k X₀
   exact ⟨_, _, isBelyiMap_baseChange k K hf₀⟩
 
 end Belyi
