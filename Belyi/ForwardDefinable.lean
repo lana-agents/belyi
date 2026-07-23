@@ -97,16 +97,14 @@ turns `e` into the shape both `IsCurveOver.of_baseChangeModel` and the transport
 descent `IsCurveOver.of_baseChangeModel` supplies the `[IsCurveOver k X₀]` instance — a `ℂ`-curve
 definable over `ℚ̄` has a `ℚ̄`-curve model — which is exactly the previously-missing input.
 
-Like `IsCurveOver.of_baseChangeModel`, this is gated on the single remaining
-`MorphismProperty.DescendsAlong (@SmoothOfRelativeDimension 1)` instance (taxis #205/#167).  The
-moment that instance lands globally, this theorem fires unconditionally and discharges the
-`hforward` hypothesis of `Belyi.belyi_iff` (`Belyi/Main.lean`, taxis #55) in a single step,
-upgrading the headline `belyi_iff` to its ungated form. -/
+Since `IsCurveOver.of_baseChangeModel` is now unconditional (all three curve-property descent
+legs — `@IsProper` #167, `@GeometricallyIntegral` #204, `@SmoothOfRelativeDimension 1` #205 —
+descend directly), this theorem is likewise unconditional: it discharges the `hforward`
+hypothesis of `Belyi.belyi_iff` (`Belyi/Main.lean`, taxis #55) in a single step and is precisely
+the forward implication of the ungated headline `belyi_iff`. -/
 theorem exists_isBelyiMap_of_definableOver
     (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
     [Field K] [Algebra k K]
-    [MorphismProperty.DescendsAlong (@SmoothOfRelativeDimension 1)
-      (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u})]
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X]
     (hdef : DefinableOver k K X) :
     ∃ f : X ⟶ P1 K, IsBelyiMap K f := by
