@@ -22,6 +22,7 @@ import Belyi.Forward
 import Belyi.ForwardDefinable
 import Belyi.ForwardPair
 import Belyi.FunctionField
+import Belyi.GaloisCategoryFiniteness
 import Belyi.GaloisCoverFiniteness
 import Belyi.KaehlerRank
 import Belyi.Main
