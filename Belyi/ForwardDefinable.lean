@@ -3,6 +3,7 @@ Copyright (c) 2026 The Belyi project contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
+import Belyi.Curve.BaseChange
 import Belyi.ForwardPair
 
 /-!
@@ -82,5 +83,36 @@ theorem exists_isBelyiMap_of_isCurveOver_baseChangeModel
     (MorphismProperty.cancel_left_of_respectsIso (P := @LocallyOfFinitePresentation)
       φ.hom (pullback.snd f₀ (P1.mapOfAlgebra k K))).mpr ‹_›
   exact ⟨φ.hom ≫ pullback.snd f₀ (P1.mapOfAlgebra k K), hg.of_isIso_comp φ.hom⟩
+
+/-- **Forward direction of Belyi's theorem, bare-`DefinableOver` form (B8).** A curve `X` over an
+extension field `K` of `k = ℚ̄` (algebraically closed, characteristic zero, algebraic over `ℚ`;
+the model case `K = ℂ`) that is *definable over `k`* — `Belyi.DefinableOver k K X` — admits a Belyi
+map `f : X ⟶ ℙ¹_K`.
+
+This is the final connector of the forward assembly (taxis #188): it feeds a *bare*
+`Belyi.DefinableOver` witness into `exists_isBelyiMap_of_isCurveOver_baseChangeModel`.  Unpacking
+the witness gives a model `X₀` over `k` with structure morphism `f₀` and an isomorphism
+`e : X ≅ pullback f₀ (specAlgebraMap k K)`; equipping `X₀` with the `Over (Spec k)` structure `⟨f₀⟩`
+turns `e` into the shape both `IsCurveOver.of_baseChangeModel` and the transport lemma consume.  The
+descent `IsCurveOver.of_baseChangeModel` supplies the `[IsCurveOver k X₀]` instance — a `ℂ`-curve
+definable over `ℚ̄` has a `ℚ̄`-curve model — which is exactly the previously-missing input.
+
+Like `IsCurveOver.of_baseChangeModel`, this is gated on the single remaining
+`MorphismProperty.DescendsAlong (@SmoothOfRelativeDimension 1)` instance (taxis #205/#167).  The
+moment that instance lands globally, this theorem fires unconditionally and discharges the
+`hforward` hypothesis of `Belyi.belyi_iff` (`Belyi/Main.lean`, taxis #55) in a single step,
+upgrading the headline `belyi_iff` to its ungated form. -/
+theorem exists_isBelyiMap_of_definableOver
+    (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
+    [Field K] [Algebra k K]
+    [MorphismProperty.DescendsAlong (@SmoothOfRelativeDimension 1)
+      (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u})]
+    (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X]
+    (hdef : DefinableOver k K X) :
+    ∃ f : X ⟶ P1 K, IsBelyiMap K f := by
+  obtain ⟨X₀, f₀, e, he⟩ := hdef
+  letI : X₀.Over (Spec (CommRingCat.of k)) := ⟨f₀⟩
+  haveI : IsCurveOver k X₀ := IsCurveOver.of_baseChangeModel k K X₀ e he
+  exact exists_isBelyiMap_of_isCurveOver_baseChangeModel k K X X₀ e
 
 end Belyi
