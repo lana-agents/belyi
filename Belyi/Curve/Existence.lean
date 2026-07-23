@@ -151,11 +151,14 @@ morphism to `ℙ¹`.  Combine `Belyi.exists_transcendental_functionField` (a tra
 element of `K(X)` exists) with
 `Belyi.isFinite_and_surjective_homOfFunctionField_of_isCurveOver`. -/
 theorem exists_isFinite_surjective_hom_to_P1 :
-    ∃ f : X ⟶ P1 k, IsFinite f ∧ Function.Surjective f.base := by
+    ∃ f : X ⟶ P1 k, IsFinite f ∧ Function.Surjective f.base ∧
+      f.IsOver (Spec (CommRingCat.of k)) := by
   haveI : IsIntegral X := IsCurveOver.isIntegral k X
   obtain ⟨t, ht⟩ := exists_transcendental_functionField k X
-  exact ⟨homOfFunctionField k X (valuationRing_stalk_of_isCurveOver k X) t,
-    isFinite_and_surjective_homOfFunctionField_of_isCurveOver k X ht⟩
+  obtain ⟨hfin, hsurj⟩ := isFinite_and_surjective_homOfFunctionField_of_isCurveOver k X ht
+  -- The map `homOfFunctionField` is a `k`-morphism (`Belyi.Curve.ToP1` instance).
+  exact ⟨homOfFunctionField k X (valuationRing_stalk_of_isCurveOver k X) t, hfin, hsurj,
+    inferInstance⟩
 
 end Curve
 

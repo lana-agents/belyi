@@ -134,7 +134,7 @@ theorem exists_definableOverPair_isBelyiMap_baseChange_of_isCurveOver
     (X₀ : Scheme.{u}) [X₀.Over (Spec (CommRingCat.of k))] [IsCurveOver k X₀] :
     ∃ (Y : Scheme.{u}) (hY : Y.Over (Spec (CommRingCat.of K))) (f : Y ⟶ P1 K),
       IsBelyiMap K f ∧ @DefinableOverPair k K _ _ _ Y hY f := by
-  obtain ⟨f₀, hf₀⟩ := exists_isBelyiMap_of_isCurveOver k X₀
+  obtain ⟨f₀, hf₀, -⟩ := exists_isBelyiMap_of_isCurveOver k X₀
   letI hY : (pullback f₀ (P1.mapOfAlgebra k K)).Over (Spec (CommRingCat.of K)) :=
     ⟨pullback.snd f₀ (P1.mapOfAlgebra k K) ≫ (P1 K ↘ Spec (CommRingCat.of K))⟩
   refine ⟨pullback f₀ (P1.mapOfAlgebra k K), hY,

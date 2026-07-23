@@ -16,6 +16,7 @@ import Belyi.DefinablePairTower
 import Belyi.Descent
 import Belyi.Dimension
 import Belyi.Forward
+import Belyi.ForwardDefinable
 import Belyi.ForwardPair
 import Belyi.FunctionField
 import Belyi.KaehlerRank
