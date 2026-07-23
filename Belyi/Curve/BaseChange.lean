@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.Curve.Basic
+import Belyi.Curve.Descent
 import Belyi.Definable
 
 /-!
@@ -18,8 +19,23 @@ All three constituents of `IsCurveOver` are stable under base change in mathlib
 is the packaging: transporting the predicate along the identification stored inside a
 `Belyi.DefinableOver` witness.
 
-The converse (descent of the curve predicate from `X/K` to a model `X₀/k₀` along the
-faithfully flat map `Spec K ⟶ Spec k₀`) is separate, harder work on the same issue.
+The converse — **descent** of the curve predicate from `X/K` to a model `X₀/k₀` along the
+faithfully flat map `Spec K ⟶ Spec k₀` — is the descent direction of B3c (taxis #167). It
+is *assembled* here from `MorphismProperty.DescendsAlong` instances for the three curve
+properties along `@Surjective ⊓ @Flat ⊓ @QuasiCompact`:
+
+* `@IsProper` descends unconditionally
+  (`AlgebraicGeometry.descendsAlong_isProper_surjective_inf_flat_inf_quasicompact`, taxis #167);
+* `@SmoothOfRelativeDimension 1` and `@GeometricallyIntegral` are **not** yet known to descend
+  in mathlib v4.32 (the `SmoothOfRelativeDimension` case needs a faithfully-flat codescent of
+  `Locally (IsStandardSmoothOfRelativeDimension n)`; the `GeometricallyIntegral` case needs
+  descent of geometric reducedness and irreducibility — both genuine mathlib gaps).
+
+The descent assembly `IsCurveOver.of_pullback` / `IsCurveOver.of_baseChangeModel` therefore
+takes those two `DescendsAlong` instances as instance hypotheses: the moment they are supplied
+(here or upstream), the curve predicate descends with no further wiring, upgrading
+`IsCurveOver.of_isCurveOver_model` to an equivalence and discharging the forward-direction gate
+of the main theorem (`Belyi/Main.lean`, taxis #55/#188).
 
 ## Main results
 
@@ -27,6 +43,9 @@ faithfully flat map `Spec K ⟶ Spec k₀`) is separate, harder work on the same
   curve over `K`.
 * `Belyi.IsCurveOver.of_isCurveOver_model`: if a `DefinableOver` witness has a model that
   is a curve over `k₀`, then `X` is a curve over `K`.
+* `Belyi.IsCurveOver.of_pullback` / `Belyi.IsCurveOver.of_baseChangeModel` (descent direction,
+  gated on the two remaining `DescendsAlong` instances): a scheme over `K` that is a curve and
+  admits a `k₀`-model has a **curve** model over `k₀`.
 -/
 
 universe u
@@ -105,5 +124,84 @@ lemma IsCurveOver.of_isCurveOver_model
   exact IsCurveOver.of_iso e.symm (by rw [Iso.symm_hom, Iso.inv_comp_eq, ← he]; rfl)
 
 end Transport
+
+section Descent
+
+open MorphismProperty
+
+/-! ### Descent direction of B3c (taxis #167)
+
+The descent of the curve predicate along the field extension `k₀ ⊆ K` is assembled from
+`DescendsAlong` instances for the three curve properties along the faithfully-flat cover
+`specAlgebraMap k₀ K : Spec K ⟶ Spec k₀` (which is `@Surjective ⊓ @Flat ⊓ @QuasiCompact`).
+`@IsProper` descends unconditionally; the two remaining descents are taken as instance
+hypotheses (see the module docstring).
+
+The `MorphismProperty Scheme.{u}` annotations on the cover pin its universe to that of the
+ambient schemes, so the instance hypotheses match the term produced at the descent call sites. -/
+
+/-- **B3c** (descent direction), assembly: if the base change of `X₀/k₀` along the field
+extension `k₀ ⊆ K` is a curve over `K`, then `X₀` is already a curve over `k₀`.
+
+Each of the three curve properties descends along the faithfully-flat cover
+`specAlgebraMap k₀ K` via `MorphismProperty.of_pullback_snd_of_descendsAlong`. `@IsProper`
+descends unconditionally (taxis #167); `@SmoothOfRelativeDimension 1` and
+`@GeometricallyIntegral` are supplied as instance hypotheses (the two remaining mathlib gaps). -/
+theorem IsCurveOver.of_pullback
+    [DescendsAlong (@SmoothOfRelativeDimension 1)
+      (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u})]
+    [DescendsAlong (@GeometricallyIntegral)
+      (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u})]
+    (X₀ : Scheme.{u}) [X₀.Over (Spec (CommRingCat.of k₀))]
+    [IsCurveOver K (pullback (X₀ ↘ Spec (CommRingCat.of k₀)) (specAlgebraMap k₀ K))] :
+    IsCurveOver k₀ X₀ := by
+  -- the structure morphism of the base change is `pullback.snd`, so `IsCurveOver K` of the
+  -- base change supplies each curve property of `pullback.snd`
+  have hsnd_smooth : SmoothOfRelativeDimension 1
+      (pullback (X₀ ↘ Spec (CommRingCat.of k₀)) (specAlgebraMap k₀ K) ↘
+        Spec (CommRingCat.of K)) := inferInstance
+  have hsnd_proper : IsProper
+      (pullback (X₀ ↘ Spec (CommRingCat.of k₀)) (specAlgebraMap k₀ K) ↘
+        Spec (CommRingCat.of K)) := inferInstance
+  have hsnd_gi : GeometricallyIntegral
+      (pullback (X₀ ↘ Spec (CommRingCat.of k₀)) (specAlgebraMap k₀ K) ↘
+        Spec (CommRingCat.of K)) := inferInstance
+  have hs : SmoothOfRelativeDimension 1 (X₀ ↘ Spec (CommRingCat.of k₀)) :=
+    of_pullback_snd_of_descendsAlong
+      (Q := (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u}))
+      (g := specAlgebraMap k₀ K) ⟨⟨inferInstance, inferInstance⟩, inferInstance⟩ hsnd_smooth
+  have hp : IsProper (X₀ ↘ Spec (CommRingCat.of k₀)) :=
+    of_pullback_snd_of_descendsAlong
+      (Q := (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u}))
+      (g := specAlgebraMap k₀ K) ⟨⟨inferInstance, inferInstance⟩, inferInstance⟩ hsnd_proper
+  have hg : GeometricallyIntegral (X₀ ↘ Spec (CommRingCat.of k₀)) :=
+    of_pullback_snd_of_descendsAlong
+      (Q := (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u}))
+      (g := specAlgebraMap k₀ K) ⟨⟨inferInstance, inferInstance⟩, inferInstance⟩ hsnd_gi
+  exact ⟨⟩
+
+/-- **B3c** (descent direction) for `DefinableOver`-shaped witnesses: if `X/K` is a curve and is
+isomorphic over `Spec K` to the base change of `X₀/k₀`, then the model `X₀` is a curve over `k₀`.
+
+This is the exact converse of `IsCurveOver.of_isCurveOver_model` and the shape a
+`Belyi.DefinableOver` witness supplies (the model `X₀`, its structure morphism, and the
+identification `e`). Gated, like `IsCurveOver.of_pullback`, on the two remaining `DescendsAlong`
+instances. -/
+theorem IsCurveOver.of_baseChangeModel
+    [DescendsAlong (@SmoothOfRelativeDimension 1)
+      (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u})]
+    [DescendsAlong (@GeometricallyIntegral)
+      (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u})]
+    {X : Scheme.{u}} [X.Over (Spec (CommRingCat.of K))]
+    [IsCurveOver K X] (X₀ : Scheme.{u}) [X₀.Over (Spec (CommRingCat.of k₀))]
+    (e : X ≅ pullback (X₀ ↘ Spec (CommRingCat.of k₀)) (specAlgebraMap k₀ K))
+    (he : e.hom ≫ pullback.snd (X₀ ↘ Spec (CommRingCat.of k₀)) (specAlgebraMap k₀ K) =
+      X ↘ Spec (CommRingCat.of K)) :
+    IsCurveOver k₀ X₀ := by
+  haveI : IsCurveOver K (pullback (X₀ ↘ Spec (CommRingCat.of k₀)) (specAlgebraMap k₀ K)) :=
+    IsCurveOver.of_iso e he
+  exact IsCurveOver.of_pullback k₀ K X₀
+
+end Descent
 
 end Belyi
