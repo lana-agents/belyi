@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.Forward
+import Belyi.ForwardDefinable
 import Belyi.Descent
 import Belyi.MarkedPair
 import Belyi.MarkedBaseChange
@@ -35,18 +36,32 @@ over `ℚ`) and `K = ℂ` (any algebraically closed field of characteristic zero
 ## The headline equivalence and its gap
 
 The clean two-way statement `DefinableOver ℚ̄ X ↔ ∃ f, IsBelyiMap f` for a curve `X` over `ℂ`
-is **not** assemblable today. Its `←` half is `belyi_converse` above. Its `→` half — from a
-bare `DefinableOver k K X` witness produce a Belyi map — needs the model `X₀ / k` obtained
-from definability to be *itself a curve*, i.e. the **B3c descent** direction
-`IsCurveOver K X ⇒ IsCurveOver k X₀` along the faithfully-flat `Spec K ⟶ Spec k` (taxis #167,
-whose ring-core keystone #167/#183 has no mathlib v4.32 template). One cannot instead apply the
-forward direction over `K = ℂ` directly: `belyi_forward` requires `Algebra.IsAlgebraic ℚ K`,
-which fails for `ℂ` — precisely why one descends the branch points to `ℚ̄`.
+is **not** assemblable unconditionally today. Its `←` half is `belyi_converse` above. Its `→`
+half — from a bare `DefinableOver k K X` witness produce a Belyi map — needs the model `X₀ / k`
+obtained from definability to be *itself a curve*, i.e. the **B3c descent** direction
+`IsCurveOver K X ⇒ IsCurveOver k X₀` along the faithfully-flat `Spec K ⟶ Spec k` (taxis #167).
+One cannot instead apply the forward direction over `K = ℂ` directly: `belyi_forward` requires
+`Algebra.IsAlgebraic ℚ K`, which fails for `ℂ` — precisely why one descends the branch points
+to `ℚ̄`.
 
-We therefore state the equivalence as `belyi_iff`, **gated on the forward implication as an
-explicit hypothesis** `hforward` (the content #167 unlocks), and prove the `←` half
-unconditionally. Once #167 lands, discharging `hforward` upgrades `belyi_iff` to the
-ungated headline in one line.
+That entire forward `→` half is now assembled: `exists_isBelyiMap_of_definableOver`
+(`Belyi/ForwardDefinable.lean`) unpacks a bare `DefinableOver k K X` witness, uses the descent
+`IsCurveOver.of_baseChangeModel` to obtain `[IsCurveOver k X₀]`, and transports the base-changed
+Belyi map back onto `X`. After the geometric-integrality and separated/proper legs of the
+descent landed (taxis #204/#167), the *only* residual input is the single mathlib-shaped
+instance `MorphismProperty.DescendsAlong (@SmoothOfRelativeDimension 1)
+(@Surjective ⊓ @Flat ⊓ @QuasiCompact)` — the smooth-descent brick, taxis #205.
+
+We therefore provide two forms of the equivalence:
+
+* `belyi_iff` — **gated on the forward implication as an explicit hypothesis** `hforward`, with
+  the `←` half proved unconditionally. Maximally weak assumption: a caller supplying the forward
+  map by any route obtains the `↔`.
+* `belyi_iff_of_descendsAlong` — **gated on the single mathlib-shaped instance**
+  `[DescendsAlong (@SmoothOfRelativeDimension 1) (@Surjective ⊓ @Flat ⊓ @QuasiCompact)]`, the
+  exact taxis-#205 brick, with the forward implication discharged internally by
+  `exists_isBelyiMap_of_definableOver`. The moment #205 supplies that instance globally, this
+  becomes the **fully ungated headline** with no further edit here.
 
 ## Main results
 
@@ -56,8 +71,11 @@ ungated headline in one line.
   isomorphism of the source curve.
 * `Belyi.definableOver_congr` (**B14a**) — the "definable over `ℚ̄`" side is invariant under
   isomorphism over `Spec K`.
-* `Belyi.belyi_iff` (**B14**) — Belyi's theorem as an `↔`, with the forward implication gated on
-  the B3c descent input.
+* `Belyi.belyi_iff` (**B14**) — Belyi's theorem as an `↔`, with the forward implication supplied
+  as an explicit hypothesis.
+* `Belyi.belyi_iff_of_descendsAlong` (**B14**) — Belyi's theorem as an `↔`, with the forward
+  implication discharged internally and gated only on the single smooth-descent instance
+  (taxis #205); fully ungated the moment that instance lands globally.
 * Marked re-exports (**B14c**): `Belyi.exists_isBelyiMap_marked_of_isCurveOver` and
   `Belyi.exists_definableOverPair_isBelyiMap_marked_baseChange_of_isCurveOver` are made
   reachable through this single import target for downstream marked-curve work.
@@ -147,5 +165,29 @@ theorem belyi_iff (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
     (hforward : DefinableOver k K X → ∃ f : X ⟶ P1 K, IsBelyiMap K f) :
     DefinableOver k K X ↔ ∃ f : X ⟶ P1 K, IsBelyiMap K f :=
   ⟨hforward, belyi_converse k K X⟩
+
+/-- **Belyi's theorem (B14), instance-gated equivalence.** For a curve `X` over `K = ℂ`
+(algebraically closed, characteristic zero) and `k = ℚ̄`, definability over `ℚ̄` is equivalent
+to admitting a Belyi map.
+
+Unlike `belyi_iff`, the forward implication `→` is **not** taken as a hypothesis: it is
+discharged internally by `exists_isBelyiMap_of_definableOver` (`Belyi/ForwardDefinable.lean`),
+which unpacks the `DefinableOver k K X` witness, descends the model to a curve over `ℚ̄`
+(`IsCurveOver.of_baseChangeModel`), and transports the base-changed Belyi map back onto `X`.
+The converse `←` is `belyi_converse` (modulo the sanctioned converse `sorry`s).
+
+The single residual assumption is the instance
+`[DescendsAlong (@SmoothOfRelativeDimension 1) (@Surjective ⊓ @Flat ⊓ @QuasiCompact)]` — the
+smooth-descent brick of B3c (taxis #205), the *only* leg of `IsCurveOver.of_baseChangeModel`
+not yet available in mathlib v4.32 (the geometric-integrality and separated/proper legs landed
+in taxis #204/#167). The moment that instance is supplied globally, this theorem is the fully
+ungated headline of Belyi's theorem, with no further change to this file. -/
+theorem belyi_iff_of_descendsAlong (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
+    [Algebra.IsAlgebraic ℚ k] [Field K] [IsAlgClosed K] [CharZero K] [Algebra k K]
+    [MorphismProperty.DescendsAlong (@SmoothOfRelativeDimension 1)
+      (@Surjective ⊓ @Flat ⊓ @QuasiCompact : MorphismProperty Scheme.{u})]
+    (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X] :
+    DefinableOver k K X ↔ ∃ f : X ⟶ P1 K, IsBelyiMap K f :=
+  ⟨exists_isBelyiMap_of_definableOver k K X, belyi_converse k K X⟩
 
 end Belyi
