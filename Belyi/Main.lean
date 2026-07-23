@@ -78,7 +78,7 @@ theorem belyi_forward
     (k : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of k))] [IsCurveOver k X] :
     ∃ f : X ⟶ P1 k, IsBelyiMap k f :=
-  exists_isBelyiMap_of_isCurveOver k X
+  (exists_isBelyiMap_of_isCurveOver k X).imp fun _ h => h.1
 
 /-- **Belyi's theorem, forward direction after base change (B8 + B2b/B3d).** The base change of
 a curve over `k = ℚ̄` to an arbitrary extension field `K` (model case `K = ℂ`) admits a Belyi
