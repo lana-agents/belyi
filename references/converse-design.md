@@ -204,6 +204,29 @@ dense-open constant locus turns out formalizable given the `SpreadOut` interface
 out of the axiom — that is the most valuable provable nugget in the converse and should be
 attempted (#53c).*
 
+**Verdict (#53c / taxis #199, attempted 2026-07-23): the nugget bottoms out — and *not* where
+this section anticipated.** The wall is **not** Chevalley constructibility of `Isom_U`'s image;
+it is one level earlier, at the **interface**. The `SpreadOut` structure as actually implemented
+(`Belyi/SpreadOut.lean`) carries only `d : ℕ`, `base`, `basePoint`, and
+`fibre : (Spec k ⟶ base) → BelyiCover k d`; the pair parameter `f` is **unused** (declared `_f`)
+and `X` enters only through a typeclass, so *no field of `SpreadOut k K X f` logically ties the
+family's fibres to `(X, f)`*. Consequently `(S : SpreadOut …) + hfin : Finite (BelyiCover.Iso k S.d)`
+cannot prove `DefinableOverPair k K X f`: the pigeonhole on `Finite (BelyiCover.Iso)` yields at
+most "two fibres of the family are isomorphic", but **no** datum connects any fibre to `(X, f)`,
+which is what the conclusion asserts. This is exactly the soundness note on
+`spreadOut_isotrivial_point` (`Belyi/Descent.lean`): the mathematical content is carried entirely
+by `hf : IsBelyiMap K f`, so the axiom essentially *is* Belyi's converse.
+
+To make a provable `spreadOut_isotrivial_point` even *statable*, `SpreadOut` must first be
+strengthened to carry (i) the generic fibre `(𝒳_η, f_η)` over `L = ℚ̄(V)` with a base-change
+identification `(𝒳_η, f_η) ×_L K ≅ (X, f)`; (ii) an actual family `𝒳 ⟶ ℙ¹_U ⟶ U` (only per-`ℚ̄`-point
+`BelyiCover` fibres are stored today, not a family), so that "specialization generic → closed point"
+is expressible; and (iii) the isotriviality/constructibility link between them. Items (i)–(iii) are
+precisely the mathlib-absent B10(ii) + isom-scheme infrastructure of §4 that the research-grade
+tracker #53d/#200 owns. **The pigeonhole nugget is therefore not separable from the research-grade
+wall**; it bottoms out before Chevalley even enters. Fold #53c/#199 into #53d/#200 and leave the
+axiom in place.
+
 ### 3c. Descent bricks for fibre recognition (#167/#168)
 
 B10's `fibre_isCurve`/`generic_eq` and B12's final identification implicitly use that a
@@ -300,14 +323,17 @@ with B9. The descent bricks (#167/#168/#183) are a *separate*, already-tracked m
   axioms; `#print axioms` must list exactly the sanctioned set. Depends on #53a and #52
   (`Belyi/Rigidity.lean`).
 
-* **#53c — (provable nugget, attempt) pigeonhole `Finite (BelyiCover.Iso) ⇒ isotrivial`.**
-  Investigate whether, given the `SpreadOut` interface, the reduction of
+* **#53c — (provable nugget, attempt — RESOLVED 2026-07-23: bottoms out, fold into #53d/#200).**
+  Investigated whether, given the `SpreadOut` interface, the reduction of
   `spreadOut_isotrivial_point` to `rigidity_finiteness` — the "finitely many iso-classes over
   a connected base ⇒ constant on a dense open ⇒ a ℚ̄-point" step — is formalizable without the
-  full isom-scheme machinery (e.g. via a countability/constructibility argument phrased on the
-  `BelyiCover.Iso` quotient). If yes, this promotes the B11 input out of the axiom and is the
-  single most valuable provable piece of the converse. If it bottoms out on Chevalley
-  constructibility, record the wall and leave the axiom.
+  full isom-scheme machinery. **Verdict: no** (see the boxed verdict at the end of §3b). The wall
+  is not Chevalley constructibility but the interface: the implemented `SpreadOut k K X f` carries
+  no field tying its fibres to `(X, f)` (the pair parameter is unused), so no pigeonhole on
+  `Finite (BelyiCover.Iso)` can produce `DefinableOverPair k K X f`. Making the statement provable
+  first requires strengthening `SpreadOut` with the generic-fibre identification + an actual family
+  + the isotriviality link — the same mathlib-absent B10(ii)/isom-scheme infra owned by #53d/#200.
+  The nugget is not separable from the research-grade wall; folded into #53d/#200, axiom left in place.
 
 * **#53d — `[BLOCKED — research-grade]` de-axiomatize B10/B11.**
   Tracker for replacing `belyi_spreadOut` (EGA IV spreading out + generic smoothness of the
