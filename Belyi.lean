@@ -21,6 +21,7 @@ import Belyi.DefinablePairFiniteDescent
 import Belyi.DefinablePairTower
 import Belyi.Descent
 import Belyi.Dimension
+import Belyi.EtaleLocusBaseChange
 import Belyi.Forward
 import Belyi.ForwardDefinable
 import Belyi.ForwardPair
