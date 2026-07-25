@@ -1,4 +1,5 @@
 import Belyi.Basic
+import Belyi.BelyiCoverEtale
 import Belyi.BelyiCoverRestrict
 import Belyi.BelyiMap
 import Belyi.Cotangent
