@@ -17,6 +17,7 @@ import Belyi.Curve.ToP1
 import Belyi.Definable
 import Belyi.DefinablePair
 import Belyi.DefinablePairFinite
+import Belyi.DefinablePairFiniteDescent
 import Belyi.DefinablePairTower
 import Belyi.Descent
 import Belyi.Dimension
@@ -65,6 +66,7 @@ import Belyi.Polynomial.Lambda
 import Belyi.Polynomial.ReductionCombined
 import Belyi.Polynomial.ReductionRational
 import Belyi.Polynomial.ReductionZeroOne
+import Belyi.QuasiFiniteDescent
 import Belyi.Ramification
 import Belyi.RamificationBaseChange
 import Belyi.RationalMap
