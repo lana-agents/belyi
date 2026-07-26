@@ -77,5 +77,6 @@ import Belyi.RigidityGroupTheory
 import Belyi.SmoothLocusBaseChange
 import Belyi.SmoothLocusCongr
 import Belyi.SmoothLocusEtaleLocus
+import Belyi.SmoothLocusSpecBaseChange
 import Belyi.SpecFiniteTypeLimit
 import Belyi.SpreadOut
