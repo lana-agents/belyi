@@ -1,3 +1,4 @@
+import Belyi.AffineSmoothLocus
 import Belyi.Basic
 import Belyi.BelyiCoverEtale
 import Belyi.BelyiCoverRestrict
