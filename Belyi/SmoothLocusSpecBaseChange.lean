@@ -44,6 +44,9 @@ gives the scheme-level **equality** `smoothLocus f' = pr ⁻¹ᵁ smoothLocus f`
 * `Belyi.smoothLocus_specMap_baseChange_eq` — the scheme-level equality of smooth loci.
 * `Belyi.ram_specMap_baseChange_eq` — the corresponding equality of ramification loci
   `Ram f' = pr ⁻¹' Ram f`.
+* `Belyi.branch_specMap_baseChange_eq` — the corresponding equality of branch loci
+  `Branch f' = q ⁻¹' Branch f`, upgrading the forward inclusion `Belyi.branch_subset_preimage`
+  to an equality at ring/affine level (the B2b/B3d branch-locus matching for this square).
 -/
 
 open AlgebraicGeometry CategoryTheory Limits TensorProduct
@@ -154,5 +157,18 @@ theorem ram_specMap_baseChange_eq :
   letI : Algebra B (A' ⊗[A] B) := Algebra.TensorProduct.rightAlgebra
   rw [Ram, Ram, Set.preimage_compl, ← Scheme.Hom.coe_preimage,
     ← smoothLocus_specMap_baseChange_eq]
+
+/-- **Branch locus equality under base change (affine square).** `Branch f' = q ⁻¹' Branch f`
+for the affine base-change square, with `f' = Spec.map (algebraMap A' (A' ⊗[A] B))`,
+`f = Spec.map (algebraMap A B)` and `q = Spec.map (algebraMap A A')`. Obtained from the
+ramification equality `ram_specMap_baseChange_eq` through the unconditional
+`Belyi.branch_preimage_eq`, applied to the pullback square `isPullback_specMap_tensor`. This
+upgrades the forward inclusion `Belyi.branch_subset_preimage` to an equality — the B2b/B3d
+branch-locus matching, at ring/affine level. -/
+theorem branch_specMap_baseChange_eq :
+    Branch (Spec.map (CommRingCat.ofHom (algebraMap A' (A' ⊗[A] B)))) =
+      (Spec.map (CommRingCat.ofHom (algebraMap A A'))) ⁻¹'
+        Branch (Spec.map (CommRingCat.ofHom (algebraMap A B))) :=
+  branch_preimage_eq isPullback_specMap_tensor ram_specMap_baseChange_eq
 
 end Belyi

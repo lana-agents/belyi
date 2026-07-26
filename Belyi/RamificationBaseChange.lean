@@ -5,6 +5,7 @@ Authors: The Belyi project contributors
 -/
 import Belyi.Ramification
 import Mathlib.AlgebraicGeometry.Restrict
+import Mathlib.AlgebraicGeometry.PullbackCarrier
 
 /-!
 # Ramification and branch loci under base change (forward inclusion, part of B2b)
@@ -30,8 +31,14 @@ open-immersion restriction square of the smooth locus onto the base-change squar
 * `Belyi.ram_subset_preimage`: hence `Ram f' ⊆ pr⁻¹ (Ram f)`.
 * `Belyi.branch_subset_preimage`: hence `Branch f' ⊆ q⁻¹ (Branch f)` — the branch locus of a
   base change lies over the branch locus of the original morphism.
+* `Belyi.branch_preimage_eq`: **upgrades the branch inclusion to an equality**
+  `Branch f' = q⁻¹ (Branch f)` *given* the ramification equality `Ram f' = pr⁻¹ (Ram f)` (the
+  descent inclusion supplied elsewhere). This half is unconditional — it needs only the
+  surjectivity of the underlying-space fibre product (mathlib's
+  `AlgebraicGeometry.Scheme.Pullback.image_preimage_eq_of_isPullback`), no smoothness or
+  faithful-flatness input.
 
-The remaining (descent) inclusion, and the specialisation to a field extension
+The remaining (descent) inclusion of `Ram`, and the specialisation to a field extension
 `k₀ ⊆ K` with the matching of the marked points `{0, 1, ∞}`, are separate follow-up work
 on #47/#48.
 -/
@@ -104,5 +111,25 @@ theorem branch_subset_preimage (hsq : IsPullback pr f' f q)
   have hw : (pr ≫ f).base x = (f' ≫ q).base x := congrArg (fun m => m.base x) hsq.w
   rw [Scheme.Hom.comp_apply, Scheme.Hom.comp_apply] at hw
   exact hw
+
+/-- **Branch-locus equality of B2b, given the ramification equality.** For a pullback square
+`IsPullback pr f' f q`, once the ramification loci match on the nose,
+`Ram f' = pr⁻¹ (Ram f)`, the branch loci match as well:
+`Branch f' = q⁻¹ (Branch f)`.
+
+Unlike the ramification equality (whose descent inclusion needs faithfully-flat descent of
+smoothness), this step is unconditional: it is a direct consequence of the surjectivity of
+the underlying-space fibre product, packaged by mathlib as
+`AlgebraicGeometry.Scheme.Pullback.image_preimage_eq_of_isPullback`
+(`f'.base '' pr.base⁻¹ s = q.base⁻¹ (f.base '' s)`) applied at `s = Ram f`. It upgrades the
+forward inclusion `branch_subset_preimage` to an equality, and is exactly what the converse
+direction (B3d/#48 → #53) consumes to identify `Branch f` as the preimage of `Branch f₀`. -/
+theorem branch_preimage_eq (hsq : IsPullback pr f' f q)
+    [LocallyOfFinitePresentation f] [LocallyOfFinitePresentation f']
+    (hram : Ram f' = pr ⁻¹' Ram f) :
+    Branch f' = q ⁻¹' Branch f := by
+  unfold Branch
+  rw [hram]
+  exact Scheme.image_preimage_eq_of_isPullback hsq (Ram f)
 
 end Belyi
