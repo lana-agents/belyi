@@ -75,6 +75,7 @@ import Belyi.RationalMap
 import Belyi.Rigidity
 import Belyi.RigidityGroupTheory
 import Belyi.SmoothLocusBaseChange
+import Belyi.SmoothLocusBaseChangeAffineBase
 import Belyi.SmoothLocusCongr
 import Belyi.SmoothLocusEtaleLocus
 import Belyi.SmoothLocusSpecBaseChange
