@@ -73,6 +73,7 @@ import Belyi.RamificationBaseChange
 import Belyi.RationalMap
 import Belyi.Rigidity
 import Belyi.RigidityGroupTheory
+import Belyi.SmoothLocusBaseChange
 import Belyi.SmoothLocusEtaleLocus
 import Belyi.SpecFiniteTypeLimit
 import Belyi.SpreadOut
