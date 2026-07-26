@@ -51,6 +51,7 @@ import Belyi.P1.ChartInjective
 import Belyi.P1.ChartTransition
 import Belyi.P1.ClosedPoints
 import Belyi.P1.Curve
+import Belyi.P1.DefinablePairBranchGlue
 import Belyi.P1.MarkedPointMatching
 import Belyi.P1.Points
 import Belyi.P1.PointsBaseChange
