@@ -61,6 +61,7 @@ import Belyi.P1.PolynomialMapBranch
 import Belyi.P1.PolynomialMapImage
 import Belyi.P1.PolynomialMapInfty
 import Belyi.P1.PolynomialMarkedBranch
+import Belyi.P1.SmoothLocusChartGlue
 import Belyi.P1.Transcendental
 import Belyi.Polynomial.ChartEtale
 import Belyi.Polynomial.CritVal
