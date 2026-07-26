@@ -19,6 +19,7 @@ import Belyi.Curve.ToP1
 import Belyi.Definable
 import Belyi.DefinablePair
 import Belyi.DefinablePairBranch
+import Belyi.DefinablePairBranchWiring
 import Belyi.DefinablePairFinite
 import Belyi.DefinablePairFiniteDescent
 import Belyi.DefinablePairTower
