@@ -5,6 +5,7 @@ import Belyi.BelyiCoverRestrict
 import Belyi.BelyiMap
 import Belyi.Converse.Basic
 import Belyi.Converse.CoveringHomotopy
+import Belyi.Converse.PathConnected
 import Belyi.Cotangent
 import Belyi.Curve.B1
 import Belyi.Curve.B1Surjective
