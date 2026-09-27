@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.Converse.Basic
+import Belyi.Converse.FEtDescent
 import Belyi.Converse.PathConnected
 import Belyi.Converse.Rigidity
 
@@ -15,7 +16,8 @@ in algebraic form: let `k` be an algebraically closed field with `k → ℂ`, `R
 generated `k`-algebra, `A` a finitely generated smooth `k`-algebra which is a domain and `B` a
 finite étale `A ⊗[k] R`-algebra. Then for any two `k`-algebra maps `ι, s : A → ℂ`, the base
 changes of `B` along `ι ⊗ id_R` and `s ⊗ id_R` are isomorphic `ℂ ⊗[k] R`-algebras
-(`Belyi.Converse.rigidityOverC`).
+(`Belyi.Converse.rigidityOverC`, proving the proposition `Belyi.Converse.RigidityOverC k` of
+`Belyi/Converse/FEtDescent.lean`, for any `k`-algebra structure on `ℂ`).
 
 Proof: this is the scheme-level rigidity theorem `Belyi.Converse.exists_iso_of_isPullback_fiber`
 applied to `Z = Spec (ℂ ⊗[k] R)`, `T = Spec (ℂ ⊗[k] A)` (whose analytification is path connected,
@@ -66,6 +68,8 @@ end BaseChange
 
 /-! ### The schemes -/
 
+section Schemes
+
 variable (k : Type u) [Field k] [Algebra k (ULift.{u} ℂ)]
   (R : Type u) [CommRing R] [Algebra k R] [Algebra.FiniteType k R]
   (A : Type u) [CommRing A] [Algebra k A] [Algebra.FiniteType k A]
@@ -84,24 +88,24 @@ lemma isPullback_prodSpec :
 
 variable {k A} in
 /-- The `ℂ`-algebra map `ℂ ⊗[k] A → ℂ` induced by a `k`-algebra map `φ : A → ℂ`. -/
-def evalTensor (φ : A →ₐ[k] ULift.{u} ℂ) : ULift.{u} ℂ ⊗[k] A →ₐ[ULift.{u} ℂ] ULift.{u} ℂ :=
+def evalTensorC (φ : A →ₐ[k] ULift.{u} ℂ) : ULift.{u} ℂ ⊗[k] A →ₐ[ULift.{u} ℂ] ULift.{u} ℂ :=
   Algebra.TensorProduct.lift (AlgHom.id (ULift.{u} ℂ) (ULift.{u} ℂ)) φ
     (fun _ _ ↦ Commute.all _ _)
 
 variable {k A} in
 /-- The `ℂ`-point of `T = Spec (ℂ ⊗[k] A)` induced by a `k`-algebra map `φ : A → ℂ`. -/
 def pointOfAlgHom (φ : A →ₐ[k] ULift.{u} ℂ) : pointLFT.{u} ⟶ baseChangeSpec k A :=
-  SchemeLFTℂ.specHom _ _ (CommRingCat.ofHom (evalTensor φ).toRingHom) (by
+  SchemeLFTℂ.specHom _ _ (CommRingCat.ofHom (evalTensorC φ).toRingHom) (by
     ext x
-    exact congrArg ULift.down ((evalTensor φ).commutes x))
+    exact congrArg ULift.down ((evalTensorC φ).commutes x))
 
 variable {k A} in
 lemma pointOfAlgHom_comp (φ : A →ₐ[k] ULift.{u} ℂ) :
     (pointOfAlgHom φ).hom.left ≫ (baseChangeSpec k A).obj.hom = 𝟙 _ := by
   have h : CommRingCat.ofHom (algebraMap (ULift.{u} ℂ) (ULift.{u} ℂ ⊗[k] A)) ≫
-      CommRingCat.ofHom (evalTensor φ).toRingHom = 𝟙 _ := by
+      CommRingCat.ofHom (evalTensorC φ).toRingHom = 𝟙 _ := by
     ext x
-    exact congrArg ULift.down ((evalTensor φ).commutes x)
+    exact congrArg ULift.down ((evalTensorC φ).commutes x)
   exact (Spec.map_comp _ _).symm.trans ((congrArg Spec.map h).trans (Spec.map_id _))
 
 variable {k A} in
@@ -199,8 +203,8 @@ lemma sectionOfAlgHom_comp_prodSpecToSpecTensor (φ : A →ₐ[k] ULift.{u} ℂ)
     simp only [← Spec.map_comp]
     congr 1
     ext a
-    change algebraMap (ULift.{u} ℂ) (ULift.{u} ℂ ⊗[k] R) (evalTensor φ (1 ⊗ₜ a)) = φ a ⊗ₜ 1
-    simp [evalTensor, Algebra.TensorProduct.algebraMap_apply]
+    change algebraMap (ULift.{u} ℂ) (ULift.{u} ℂ ⊗[k] R) (evalTensorC φ (1 ⊗ₜ a)) = φ a ⊗ₜ 1
+    simp [evalTensorC, Algebra.TensorProduct.algebraMap_apply]
   · rw [Category.assoc, prodSpecToSpecTensor, IsPullback.lift_snd, ← Category.assoc,
       sectionOfAlgHom_hom_left_fst, Category.id_comp]
     change Spec.map _ = Spec.map _ ≫ Spec.map _
@@ -311,9 +315,10 @@ lemma isPullback_fiberSpec (φ : A →ₐ[k] ULift.{u} ℂ) {gφ : B →+* Bφ}
   rw [pullback.lift_snd, sectionOfAlgHom_comp_prodSpecToSpecTensor]
   exact isPullback_Spec_of_isBaseChangeAlong φ gφ hbc
 
+end Schemes
+
 /-! ### Rigidity over `ℂ` -/
 
-omit [Algebra.FiniteType k R] in
 /-- An isomorphism `Spec B₁ ≅ Spec B₂` over `Spec S` comes from an `S`-algebra isomorphism. -/
 lemma nonempty_algEquiv_of_iso {S B₁ B₂ : Type u} [CommRing S] [CommRing B₁] [CommRing B₂]
     [Algebra S B₁] [Algebra S B₂]
@@ -336,24 +341,13 @@ lemma nonempty_algEquiv_of_iso {S B₁ B₂ : Type u} [CommRing S] [CommRing B�
   exact ⟨AlgEquiv.ofRingEquiv (f := f) fun x ↦
     congrArg (fun ψ : CommRingCat.of S ⟶ CommRingCat.of B₂ ↦ ψ x) hc'⟩
 
-omit [Algebra.FiniteType k R] [Algebra.FiniteType k A] in
 /-- **Rigidity over `ℂ` (S3).** Let `k` be an algebraically closed field with `k → ℂ`, `R` a
 finitely generated `k`-algebra, `A` a finitely generated smooth `k`-algebra which is a domain, and
 `B` a finite étale `A ⊗[k] R`-algebra. For any two `k`-algebra maps `ι, s : A → ℂ`, the base
 changes `B_ι`, `B_s` of `B` along `ι ⊗ id_R` and `s ⊗ id_R` are isomorphic as
 `ℂ ⊗[k] R`-algebras. -/
-theorem rigidityOverC [IsAlgClosed k] :
-    ∀ (R : Type u) [CommRing R] [Algebra k R] [Algebra.FiniteType k R]
-      (A : Type u) [CommRing A] [IsDomain A] [Algebra k A] [Algebra.FiniteType k A]
-      [Algebra.Smooth k A]
-      (B : Type u) [CommRing B] [Algebra (A ⊗[k] R) B] [Algebra.Etale (A ⊗[k] R) B]
-      [Module.Finite (A ⊗[k] R) B]
-      (ι s : A →ₐ[k] ULift.{u} ℂ)
-      (Bι Bs : Type u) [CommRing Bι] [Algebra (ULift.{u} ℂ ⊗[k] R) Bι] [CommRing Bs]
-      [Algebra (ULift.{u} ℂ ⊗[k] R) Bs]
-      (gι : B →+* Bι) (_ : IsBaseChangeAlong (R := R) ι gι) (gs : B →+* Bs)
-      (_ : IsBaseChangeAlong (R := R) s gs),
-      Nonempty (Bι ≃ₐ[ULift.{u} ℂ ⊗[k] R] Bs) := by
+theorem rigidityOverC (k : Type u) [Field k] [IsAlgClosed k] [Algebra k (ULift.{u} ℂ)] :
+    RigidityOverC k := by
   intro R _ _ _ A _ _ _ _ _ B _ _ _ _ ι s Bι Bs _ _ _ _ gι hι gs hs
   haveI := pathConnectedSpace_analytification_baseChangeSpec k A
   haveI : IsAffine (baseChangeSpec k R).obj.left :=
