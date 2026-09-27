@@ -6,6 +6,7 @@ import Belyi.BelyiMap
 import Belyi.Converse.BaseChange
 import Belyi.Converse.Basic
 import Belyi.Converse.CoveringHomotopy
+import Belyi.Converse.DefinableOfBelyi
 import Belyi.Converse.HomDescent
 import Belyi.Converse.IntegralClosureBaseChange
 import Belyi.Converse.IsoDescent
