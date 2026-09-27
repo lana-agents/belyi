@@ -392,4 +392,14 @@ theorem derivAlong_mem {π : K} (ht : Transcendental ℚ π) [FiniteDimensional 
   obtain ⟨y, hy, hN'⟩ := key N
   exact hN' (hN y hy)
 
+/-- `derivAlong_mem`, with the uniformiser hypothesis phrased as `𝔪_O = (π)`. -/
+theorem derivAlong_mem_of_maximalIdeal_eq {π : K} (ht : Transcendental ℚ π)
+    [FiniteDimensional ℚ⟮π⟯ K] (hQ : ∀ q : ℚ, algebraMap ℚ K q ∈ O)
+    (hres : ∀ x ∈ O, ∃ p : ℚ[X], p ≠ 0 ∧ O.valuation (aeval x p) < 1)
+    [IsDiscreteValuationRing O] (hπO : π ∈ O)
+    (hmax : IsLocalRing.maximalIdeal O = Ideal.span {⟨π, hπO⟩}) {x : K} (hx : x ∈ O) :
+    derivAlong π x ∈ O :=
+  derivAlong_mem O ht hQ hres hπO
+    ((IsDiscreteValuationRing.irreducible_iff_uniformizer _).mpr hmax) hx
+
 end Belyi.CurveDeriv
