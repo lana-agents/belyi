@@ -102,3 +102,9 @@ import Belyi.SmoothLocusCongr
 import Belyi.SmoothLocusEtaleLocus
 import Belyi.SmoothLocusSpecBaseChange
 import Belyi.SpecFiniteTypeLimit
+import Belyi.CurveField.Basic
+import Belyi.CurveField.Chart
+import Belyi.CurveField.Place
+import Belyi.CurveField.Residue
+import Belyi.CurveField.ZerosPoles
+import Belyi.CurveField.Point
