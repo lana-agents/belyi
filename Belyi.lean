@@ -4,6 +4,7 @@ import Belyi.BelyiCoverEtale
 import Belyi.BelyiCoverRestrict
 import Belyi.BelyiMap
 import Belyi.Converse.Basic
+import Belyi.Converse.Normalization
 import Belyi.Cotangent
 import Belyi.Curve.B1
 import Belyi.Curve.B1Surjective
