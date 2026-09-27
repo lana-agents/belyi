@@ -6,6 +6,7 @@ import Belyi.BelyiMap
 import Belyi.Converse.BaseChange
 import Belyi.Converse.Basic
 import Belyi.Converse.CoveringHomotopy
+import Belyi.Converse.PathConnected
 import Belyi.Converse.Spread
 import Belyi.Cotangent
 import Belyi.Curve.B1
