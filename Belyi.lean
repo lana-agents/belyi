@@ -3,9 +3,12 @@ import Belyi.Basic
 import Belyi.BelyiCoverEtale
 import Belyi.BelyiCoverRestrict
 import Belyi.BelyiMap
+import Belyi.Converse.AnalyticProduct
 import Belyi.Converse.Basic
 import Belyi.Converse.CoveringHomotopy
 import Belyi.Converse.PathConnected
+import Belyi.Converse.Rigidity
+import Belyi.Converse.RigidityC
 import Belyi.Cotangent
 import Belyi.Curve.B1
 import Belyi.Curve.B1Surjective
