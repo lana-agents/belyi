@@ -72,3 +72,11 @@ Everything below is sorry-free. Statement labels (B1, B2a, …) refer to
 * `Belyi/Polynomial/` — the two polynomial reduction theorems, complete.
 * `Belyi/Definable.lean`, `Belyi/Curve/BaseChange.lean` — `DefinableOver`, B3a, B3b
   and the base-change half of B3c.
+
+**Converse via Riemann existence** (plan: [`references/converse-rie-design.md`](references/converse-rie-design.md))
+
+* `Belyi/Converse/Basic.lean` — the base-change interface `IsBaseChangeAlong`.
+* `Belyi/Converse/PuncturedLine.lean` — (P1) `ℙ¹ ∖ {0, 1, ∞} = Spec k[t][(t(t-1))⁻¹]` and its
+  base change, compatibly with `ℙ¹_K ≅ ℙ¹_k ×_k K`.
+* `Belyi/Converse/PuncturedLineBelyi.lean` — (P1) a Belyi map is finite étale over the
+  punctured line: `f⁻¹(ℙ¹ ∖ {0, 1, ∞}) = Spec B` with `B` finite étale, dense in `X`.
