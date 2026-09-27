@@ -117,7 +117,8 @@ theorem isIso_normalizationDesc_of_isIntegrallyClosed
     simp only [κ, Scheme.Hom.appLE_appIso_inv_assoc]
     exact X.presheaf.germ_res _ _ _
   have hκinj : Function.Injective κ :=
-    (X.germToFunctionField_injective (j ''ᵁ V)).comp (j.appIso V).commRingCatIsoToRingEquiv.symm.injective
+    (X.germToFunctionField_injective (j ''ᵁ V)).comp
+      (j.appIso V).commRingCatIsoToRingEquiv.symm.injective
   have hjinj : Function.Injective (j.appLE W V hVW) := by
     have h := X.germToFunctionField_injective W
     rw [← hκ] at h
