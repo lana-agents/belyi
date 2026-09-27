@@ -19,5 +19,10 @@ name = "oka"
 git = "https://github.com/lana-agents/oka.git"
 rev = "da228a2cf9671aaba08ddc96274d75e098b28f67"
 
+[[require]]
+name = "pi1"
+git = "https://github.com/lana-agents/pi1.git"
+rev = "1959a9713173af85d3fda9ba6836e602c8927f94"
+
 [[lean_lib]]
 name = "Belyi"
