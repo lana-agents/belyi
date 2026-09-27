@@ -55,6 +55,16 @@ open Polynomial
 /-- The algebraic closure `ℚ̄` of `ℚ`. -/
 abbrev Qbar : Type := AlgebraicClosure ℚ
 
+/-- Equality on `ℚ̄` is decided classically. -/
+noncomputable instance : DecidableEq Qbar := Classical.decEq _
+
+/-- `ℚ̄` is algebraic over `ℚ` (stated for the instance `Algebra ℚ Qbar` found by type class
+search, which is only defeq, not reducibly, to the one of `AlgebraicClosure`). -/
+instance : Algebra.IsAlgebraic ℚ Qbar := AlgebraicClosure.isAlgebraic ℚ
+
+/-- `ℚ̄` is an algebraic closure of `ℚ` (see the previous instance). -/
+instance : IsAlgClosure ℚ Qbar := AlgebraicClosure.instIsAlgClosure ℚ
+
 /-- The points of `ℙ¹(ℚ̄)`: `none` is the point `∞`, `some x` is the finite point `x`. -/
 abbrev Pt : Type := Option Qbar
 
@@ -88,7 +98,6 @@ inductive ElemMap
 
 namespace ElemMap
 
-open Classical in
 /-- The action of an elementary map on `ℙ¹(ℚ̄)`. -/
 noncomputable def apply : ElemMap → Pt → Pt
   | mob a _ c _ _, none => if c = 0 then none else some ((a / c : ℚ) : Qbar)
@@ -133,7 +142,6 @@ lemma apply_poly_ofRat {p : ℚ[X]} (hp : 0 < p.natDegree) (q : ℚ) :
 lemma apply_mob_none {a b c d : ℚ} (h : a * d - b * c ≠ 0) :
     (mob a b c d h).apply none = if c = 0 then none else some ((a / c : ℚ) : Qbar) := rfl
 
-open Classical in
 lemma apply_mob_some {a b c d : ℚ} (h : a * d - b * c ≠ 0) (z : Qbar) :
     (mob a b c d h).apply (some z) =
       if (c : Qbar) * z + d = 0 then none
@@ -181,10 +189,10 @@ lemma apply_map (σ : Qbar ≃ₐ[ℚ] Qbar) (h : ElemMap) (z : Pt) :
       simp only [Option.map_some, apply_mob_some]
       have key : (c : Qbar) * σ z + d = σ ((c : Qbar) * z + d) := by
         simp [map_ratCast]
-      rw [key, map_eq_zero_iff σ σ.injective]
-      split_ifs
-      · rfl
-      · simp [map_ratCast, map_div₀]
+      by_cases hz : (c : Qbar) * z + d = 0
+      · rw [if_pos hz, if_pos (by rw [key, hz, map_zero])]; rfl
+      · rw [if_neg hz, if_neg (by rw [key]; exact (map_ne_zero_iff σ σ.injective).mpr hz)]
+        simp [map_ratCast, map_div₀]
   | poly p hp =>
     cases z with
     | none => rfl
