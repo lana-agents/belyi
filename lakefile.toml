@@ -14,5 +14,10 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.32.0"
 
+[[require]]
+name = "oka"
+git = "https://github.com/lana-agents/oka.git"
+rev = "da228a2cf9671aaba08ddc96274d75e098b28f67"
+
 [[lean_lib]]
 name = "Belyi"
