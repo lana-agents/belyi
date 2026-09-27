@@ -7,7 +7,10 @@ import Belyi.Converse.BaseChange
 import Belyi.Converse.Basic
 import Belyi.Converse.CoveringHomotopy
 import Belyi.Converse.HomDescent
+import Belyi.Converse.IntegralClosureBaseChange
 import Belyi.Converse.IsoDescent
+import Belyi.Converse.Normalization
+import Belyi.Converse.NormalizationBaseChange
 import Belyi.Converse.PathConnected
 import Belyi.Converse.Points
 import Belyi.Converse.PuncturedLine
