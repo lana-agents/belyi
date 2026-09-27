@@ -5,7 +5,7 @@ Authors: The Belyi project contributors
 -/
 import Belyi.Forward
 import Belyi.ForwardDefinable
-import Belyi.Descent
+import Belyi.Converse.Main
 import Belyi.MarkedPair
 import Belyi.MarkedBaseChange
 
@@ -24,44 +24,24 @@ can depend on `import Belyi.Main` alone.
 Working with `k = ℚ̄` (an algebraically closed field of characteristic zero that is algebraic
 over `ℚ`) and `K = ℂ` (any algebraically closed field of characteristic zero over `k`):
 
-* **Forward (B8), `belyi_forward`.** Every curve over `k = ℚ̄` admits a Belyi map. This is the
-  genuinely `axiom`/`sorry`-free half (`Belyi/Forward.lean`), taking the `ℚ̄`-curve **model as
-  data** — exactly what B1 produces.
-* **Converse (B12), `belyi_converse`.** A curve over `K = ℂ` that admits a Belyi map is
-  definable over `k = ℚ̄` (`Belyi/Descent.lean`). This rests on the three **sanctioned**
-  converse obligations `rigidity_finiteness` (B9), `belyi_spreadOut` (B10(ii)) and
-  `spreadOut_isotrivial_point` (B11), currently stated as `theorem … := sorry` and tracked by
-  taxis issues #194 / #199 / #200.
+* **Forward (B8), `belyi_forward`.** Every curve over `k = ℚ̄` admits a Belyi map
+  (`Belyi/Forward.lean`), taking the `ℚ̄`-curve **model as data** — exactly what B1 produces;
+  `exists_isBelyiMap_of_definableOver` (`Belyi/ForwardDefinable.lean`) upgrades this to a bare
+  `DefinableOver k K X` witness, descending the model to a curve over `k` (B3c).
+* **Converse (B12), `belyi_converse`.** A curve over `K` that admits a Belyi map is definable
+  over `k = ℚ̄` (`Belyi/Converse/Main.lean`). The proof (`references/converse-rie-design.md`)
+  descends the finite étale cover `f⁻¹(ℙ¹ ∖ {0, 1, ∞}) ⟶ ℙ¹ ∖ {0, 1, ∞}` from `K` to `k` —
+  spreading out over a smooth `k`-variety, comparing the fibres at a generic and at a
+  `k`-rational `ℂ`-point by the covering-homotopy property and the **Riemann existence
+  theorem** of the `oka` dependency — and recovers `X` as a relative normalization of `ℙ¹`.
 
-## The headline equivalence and its gap
+## The headline equivalence
 
-The clean two-way statement `DefinableOver ℚ̄ X ↔ ∃ f, IsBelyiMap f` for a curve `X` over `ℂ`
-is **not** assemblable unconditionally today. Its `←` half is `belyi_converse` above. Its `→`
-half — from a bare `DefinableOver k K X` witness produce a Belyi map — needs the model `X₀ / k`
-obtained from definability to be *itself a curve*, i.e. the **B3c descent** direction
-`IsCurveOver K X ⇒ IsCurveOver k X₀` along the faithfully-flat `Spec K ⟶ Spec k` (taxis #167).
-One cannot instead apply the forward direction over `K = ℂ` directly: `belyi_forward` requires
-`Algebra.IsAlgebraic ℚ K`, which fails for `ℂ` — precisely why one descends the branch points
-to `ℚ̄`.
-
-That entire forward `→` half is now assembled and **unconditional**:
-`exists_isBelyiMap_of_definableOver` (`Belyi/ForwardDefinable.lean`) unpacks a bare
-`DefinableOver k K X` witness, uses the descent `IsCurveOver.of_baseChangeModel` to obtain
-`[IsCurveOver k X₀]`, and transports the base-changed Belyi map back onto `X`. All three B3c
-curve-property legs now descend directly along the field extension — `@IsProper` (taxis #167),
-`@GeometricallyIntegral` (taxis #204), and `@SmoothOfRelativeDimension 1` (taxis #205, via the
-field-specific `smoothOfRelativeDimension_of_baseChange` that sidesteps the general codescent
-gap) — so no `DescendsAlong` instance hypothesis remains.
-
-The headline is therefore fully ungated:
-
-* `belyi_iff` — Belyi's theorem `DefinableOver ℚ̄ X ↔ ∃ f, IsBelyiMap f`, with **both**
-  implications discharged: the forward `→` internally by `exists_isBelyiMap_of_definableOver`
-  (genuinely `sorry`-free/axiom-free) and the converse `←` by `belyi_converse` (modulo the
-  sanctioned research-grade converse obligations, taxis #194/#200).
-* `belyi_iff_of_descendsAlong` — retained for continuity with the taxis-#205 frontier; the
-  `DescendsAlong (@SmoothOfRelativeDimension 1)` instance that once gated it is now discharged
-  directly, so it is definitionally the ungated `belyi_iff`.
+* `belyi_iff` — Belyi's theorem `DefinableOver ℚ̄ X ↔ ∃ f, IsBelyiMap f`, with both
+  implications proved. `#print axioms Belyi.belyi_iff` reports only
+  `[propext, Classical.choice, Quot.sound]`.
+* `belyi_iff_of_descendsAlong` — retained for continuity with the taxis-#205 frontier; it is
+  definitionally `belyi_iff`.
 
 ## Main results
 
@@ -71,8 +51,8 @@ The headline is therefore fully ungated:
   isomorphism of the source curve.
 * `Belyi.definableOver_congr` (**B14a**) — the "definable over `ℚ̄`" side is invariant under
   isomorphism over `Spec K`.
-* `Belyi.belyi_iff` (**B14**) — Belyi's theorem as an `↔`, fully ungated (forward `→` discharged
-  internally and axiom-free; converse `←` modulo the sanctioned obligations).
+* `Belyi.belyi_iff` (**B14**) — Belyi's theorem as an `↔`, both directions proved (axioms: only
+  `propext`, `Classical.choice`, `Quot.sound`).
 * `Belyi.belyi_iff_of_descendsAlong` (**B14**) — retained for continuity with the taxis-#205
   frontier; now definitionally the ungated `belyi_iff`.
 * `Belyi.definableOver_baseChangeAlgEquiv` / `Belyi.exists_isBelyiMap_baseChangeAlgEquiv`
@@ -114,8 +94,7 @@ theorem belyi_forward_baseChange
 
 /-- **Belyi's theorem, converse direction (B12).** A curve `X` over `K = ℂ` (algebraically
 closed, characteristic zero) that admits a Belyi map is definable over `k = ℚ̄`. Re-export of
-`Belyi.definableOver_of_exists_isBelyiMap`; rests on the sanctioned converse obligations
-(`rigidity_finiteness`, `belyi_spreadOut`, `spreadOut_isotrivial_point`). -/
+`Belyi.definableOver_of_exists_isBelyiMap` (`Belyi/Converse/Main.lean`). -/
 theorem belyi_converse (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
     [Algebra.IsAlgebraic ℚ k] [Field K] [IsAlgClosed K] [CharZero K] [Algebra k K]
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X]
@@ -157,20 +136,9 @@ theorem definableOver_congr (k K : Type u) [CommRing k] [CommRing K] [Algebra k 
 zero) and `k = ℚ̄`, definability over `ℚ̄` is equivalent to admitting a Belyi map:
 `DefinableOver ℚ̄ X ↔ ∃ f, IsBelyiMap f`.
 
-Both implications are now assembled with no extra hypothesis:
-* forward (`→`) is `exists_isBelyiMap_of_definableOver` (`Belyi/ForwardDefinable.lean`, taxis #188),
-  which unpacks the `DefinableOver k K X` witness, descends the model to a curve over `ℚ̄` via the
-  now-**unconditional** `IsCurveOver.of_baseChangeModel` (all three B3c curve-property legs —
-  `@IsProper` taxis #167, `@GeometricallyIntegral` taxis #204, `@SmoothOfRelativeDimension 1`
-  taxis #205 — descend directly along the field extension), and transports the base-changed Belyi
-  map back onto `X`;
-* converse (`←`) is `belyi_converse` (taxis #12), proved modulo the three sanctioned research-grade
-  converse obligations (B9 `rigidity_finiteness` taxis #194, B10(ii) `belyi_spreadOut` and B11
-  `spreadOut_isotrivial_point` taxis #200), which surface as `sorry`/`sorryAx` — see
-  `#print axioms`.
-
-The forward direction is genuinely `sorry`-free and axiom-free; the only residual obligations are
-the sanctioned converse ones. -/
+* forward (`→`) is `exists_isBelyiMap_of_definableOver` (`Belyi/ForwardDefinable.lean`);
+* converse (`←`) is `belyi_converse` (`Belyi/Converse/Main.lean`), via the Riemann existence
+  theorem. -/
 theorem belyi_iff (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
     [Algebra.IsAlgebraic ℚ k] [Field K] [IsAlgClosed K] [CharZero K] [Algebra k K]
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of K))] [IsCurveOver K X] :

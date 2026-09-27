@@ -1,7 +1,8 @@
 # Belyi's theorem in Lean 4
 
-A formalization of **Belyi's theorem** in Lean 4 building on
-[mathlib](https://github.com/leanprover-community/mathlib4):
+A complete, sorry- and axiom-free formalization of **Belyi's theorem** in Lean 4 building on
+[mathlib](https://github.com/leanprover-community/mathlib4) and on the Riemann existence theorem
+of [oka](https://github.com/lana-agents/oka):
 
 > A smooth projective geometrically connected curve over `ℂ` is definable over `ℚ̄`
 > if and only if it admits a finite morphism to `ℙ¹` whose branch locus is contained
@@ -38,7 +39,7 @@ lake build
 
 ## Contents
 
-Everything below is sorry-free. Statement labels (B1, B2a, …) refer to
+Everything below is sorry-free and axiom-free. Statement labels (B1, B2a, …) refer to
 [`references/proof-outline.md`](references/proof-outline.md).
 
 **Curves and the projective line**
@@ -80,3 +81,28 @@ Everything below is sorry-free. Statement labels (B1, B2a, …) refer to
   base change, compatibly with `ℙ¹_K ≅ ℙ¹_k ×_k K`.
 * `Belyi/Converse/PuncturedLineBelyi.lean` — (P1) a Belyi map is finite étale over the
   punctured line: `f⁻¹(ℙ¹ ∖ {0, 1, ∞}) = Spec B` with `B` finite étale, dense in `X`.
+* `Belyi/Converse/BaseChange.lean`, `Belyi/Converse/ConstantFamily.lean` — base-change API.
+* `Belyi/Converse/Spread.lean` — (S1) spreading a finite étale algebra out over a smooth
+  finitely generated `k`-subalgebra of `K`.
+* `Belyi/Converse/Points.lean` — (S4) `k`-points and injective embeddings into `ℂ`.
+* `Belyi/Converse/HomDescent.lean`, `Belyi/Converse/IsoDescent.lean` — (S2) isomorphisms over
+  `ℂ` descend to `K`.
+* `Belyi/Converse/CoveringHomotopy.lean` — (S3b) covering maps over `Z × T` have homeomorphic
+  fibres along paths in `T`.
+* `Belyi/Converse/PathConnected.lean` — (S3a) analytifications of smooth connected
+  `ℂ`-schemes are path connected.
+* `Belyi/Converse/AnalyticProduct.lean`, `Belyi/Converse/Rigidity.lean`,
+  `Belyi/Converse/RigidityC.lean` — (S3) finite étale families over a smooth connected base have
+  isomorphic fibres at any two `ℂ`-points, by the Riemann existence theorem of `oka`.
+* `Belyi/Converse/FEtDescent.lean` — (★) finite étale covers descend from `K` to `k`.
+* `Belyi/Converse/Normalization.lean`, `Belyi/Converse/IntegralClosureBaseChange.lean`,
+  `Belyi/Converse/NormalizationBaseChange.lean` — (P2) a curve is the normalization of `ℙ¹` in
+  a dense open; normalization commutes with base change along field extensions.
+* `Belyi/Converse/DefinableOfBelyi.lean`, `Belyi/Converse/Main.lean` — **B12**, the converse.
+
+**Main theorem**
+
+* `Belyi/Main.lean` — **B14** `Belyi.belyi_iff`: for a curve `X` over `K = ℂ` (any algebraically
+  closed field of characteristic zero) and `k = ℚ̄`,
+  `DefinableOver k K X ↔ ∃ f : X ⟶ P1 K, IsBelyiMap K f`.
+  `#print axioms Belyi.belyi_iff` = `[propext, Classical.choice, Quot.sound]`.

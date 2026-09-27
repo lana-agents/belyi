@@ -11,15 +11,12 @@ import Mathlib.AlgebraicGeometry.Morphisms.UnderlyingMap
 import Mathlib.LinearAlgebra.Dimension.Finrank
 
 /-!
-# Rigidity input (B9): the sanctioned axiom of the project
+# Belyi covers of bounded degree
 
-This file states statement **B9** of `references/proof-outline.md` — the deep external
-input to the *converse* direction of Belyi's theorem — as the **single, isolated
-`axiom`** of the whole project. See `references/rigidity-design.md` for the full design
-decision: the geometry-to-group-theory bridge (Riemann existence + finite generation of
-the étale fundamental group of the thrice-punctured line) is genuinely far from mathlib
-v4.32, so it is axiomatized here, in one clearly-named place, and nothing on the *forward*
-direction depends on this file.
+This file defines Belyi covers of `ℙ¹_k` of bounded degree and their isomorphism classes over
+`ℙ¹_k` (the objects of statement **B9** of `references/proof-outline.md`). The converse direction
+of Belyi's theorem no longer uses the finiteness statement B9: it is proved via the Riemann
+existence theorem, see `references/converse-rie-design.md` and `Belyi/Converse/Main.lean`.
 
 ## Main definitions
 
@@ -33,12 +30,6 @@ direction depends on this file.
 * `Belyi.BelyiCover k d`: a degree-`≤ d` Belyi cover of `ℙ¹_k` — a curve `X/k` with a
   finite dominant Belyi map `f : X ⟶ ℙ¹_k` of function-field degree `≤ d`.
 * `Belyi.BelyiCover.Iso k d`: the quotient of `BelyiCover k d` by isomorphism over `ℙ¹_k`.
-
-## Main statement
-
-* `Belyi.rigidity_finiteness`: **the** axiom — for `k` algebraically closed of
-  characteristic `0`, there are only finitely many degree-`≤ d` Belyi covers of `ℙ¹_k` up
-  to isomorphism over `ℙ¹_k`.
 -/
 
 universe u
@@ -124,23 +115,5 @@ def isoSetoid : Setoid (BelyiCover k d) where
 def Iso : Type (u + 1) := Quotient (isoSetoid k d)
 
 end BelyiCover
-
-/-- **B9 (rigidity input), axiomatized.** For `k` algebraically closed of characteristic
-`0` and any `d`, there are only finitely many degree-`≤ d` Belyi covers of `ℙ¹_k` up to
-isomorphism over `ℙ¹_k`.
-
-Justification (NOT formalized — this is the Riemann-existence content the project declines
-to build against mathlib v4.32, see `references/rigidity-design.md`): such covers
-correspond to finite `F₂`-sets of cardinality `≤ d`, and a finitely generated group has
-only finitely many subgroups of bounded index
-(`Belyi.finite_boundedIndex_subgroups_freeGroupTwo`, issue #52b).
-
-Per taxis #201 this is stated as a `theorem` with `sorry` rather than an `axiom`, so that
-the outstanding proof obligation is surfaced honestly (it shows up as `sorryAx` in
-`#print axioms` and as a `sorry` warning) and tracked as a concrete goal. The proof is the
-research-grade rigidity content scoped in issue #194 (de-axiomatize B9); see
-`references/rigidity-design.md`. -/
-theorem rigidity_finiteness (k : Type u) [Field k] [IsAlgClosed k] [CharZero k] (d : ℕ) :
-    Finite (BelyiCover.Iso k d) := sorry
 
 end Belyi

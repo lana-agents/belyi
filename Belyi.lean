@@ -41,7 +41,6 @@ import Belyi.DefinablePairBranch
 import Belyi.DefinablePairFinite
 import Belyi.DefinablePairFiniteDescent
 import Belyi.DefinablePairTower
-import Belyi.Descent
 import Belyi.Dimension
 import Belyi.EtaleLocusBaseChange
 import Belyi.Forward
@@ -103,4 +102,3 @@ import Belyi.SmoothLocusCongr
 import Belyi.SmoothLocusEtaleLocus
 import Belyi.SmoothLocusSpecBaseChange
 import Belyi.SpecFiniteTypeLimit
-import Belyi.SpreadOut

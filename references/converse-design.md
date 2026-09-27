@@ -1,5 +1,9 @@
 # Converse direction (B10–B12): design decision and formalization boundary
 
+> **Superseded.** The converse is now proved without `sorry` via the Riemann existence theorem,
+> following `references/converse-rie-design.md`; `Belyi/SpreadOut.lean`, `Belyi/Descent.lean` and
+> `rigidity_finiteness` have been removed. This document is kept for the historical record.
+
 Taxis issue **#53** — *Converse direction: curves with a Belyi map descend to `ℚ̄`*.
 This is the second half of Belyi's theorem (`references/proof-outline.md`, statements
 **B10 → B11 → B12**, feeding on the rigidity input **B9** of issue #52). This document is

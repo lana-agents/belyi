@@ -24,9 +24,9 @@ thrice-punctured line `ℙ¹ ∖ {0,1,∞}` — does.
 Via Riemann existence, connected finite covers of `ℙ¹_ℂ ∖ {0,1,∞}` of degree `n`
 correspond to index-`n` subgroups of `F₂`, and general degree-`≤ d` covers to finite
 `F₂`-sets of cardinality `≤ d`. The finiteness of such combinatorial data is exactly
-the statement `Belyi.finite_boundedIndex_subgroups_freeGroupTwo` below. This lemma is
-recorded as verified *evidence* for the (separately axiomatized) geometric rigidity
-statement `Belyi.rigidity_finiteness`; it is deliberately geometry-free and
+the statement `Belyi.finite_boundedIndex_subgroups_freeGroupTwo` below. This lemma is the
+group-theoretic half of the rigidity statement B9 (finiteness of Belyi covers of bounded
+degree); the proof of Belyi's theorem no longer depends on B9. It is geometry-free and
 upstreamable to Mathlib.
 
 ## Main results
