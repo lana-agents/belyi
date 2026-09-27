@@ -3,8 +3,10 @@ import Belyi.Basic
 import Belyi.BelyiCoverEtale
 import Belyi.BelyiCoverRestrict
 import Belyi.BelyiMap
+import Belyi.Converse.BaseChange
 import Belyi.Converse.Basic
 import Belyi.Converse.CoveringHomotopy
+import Belyi.Converse.Spread
 import Belyi.Cotangent
 import Belyi.Curve.B1
 import Belyi.Curve.B1Surjective
