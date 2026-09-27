@@ -5,6 +5,7 @@ import Belyi.BelyiCoverRestrict
 import Belyi.BelyiMap
 import Belyi.Converse.Basic
 import Belyi.Converse.HomDescent
+import Belyi.Converse.IsoDescent
 import Belyi.Converse.Points
 import Belyi.Cotangent
 import Belyi.Curve.B1
