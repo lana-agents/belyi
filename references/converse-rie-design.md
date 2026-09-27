@@ -94,6 +94,7 @@ New files under `Belyi/Converse/`:
 
 | file | content | package |
 |---|---|---|
+| `Basic.lean` | shared interface `IsBaseChangeAlong φ g` (base change along `φ ⊗ id_R`) | done |
 | `Spread.lean` | (S1) spreading a finite étale algebra over `K ⊗_k R` to `A ⊗_k R` | S1 |
 | `Points.lean` | (S4) `s : A →ₐ[k] k`, injective `ι : A →ₐ[k] ℂ` | S4 |
 | `IsoDescent.lean` | (S2) from an iso over `ℂ` to an iso over `K` | S2 |
