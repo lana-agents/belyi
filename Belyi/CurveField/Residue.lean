@@ -4,6 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.CurveField.Place
+import Mathlib.Algebra.Algebra.Hom.Rat
+import Mathlib.NumberTheory.NumberField.Basic
+import Mathlib.RingTheory.Jacobson.Ring
 
 /-!
 # Residue fields and degrees of places

@@ -108,3 +108,4 @@ import Belyi.CurveField.Place
 import Belyi.CurveField.Residue
 import Belyi.CurveField.ZerosPoles
 import Belyi.CurveField.Point
+import Belyi.CurveField.Degree

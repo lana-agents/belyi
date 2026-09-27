@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.CurveField.Place
+import Mathlib.RingTheory.DedekindDomain.Factorization
 
 /-!
 # Zeros and poles of functions on a curve

@@ -4,6 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.CurveField.Residue
+import Mathlib.FieldTheory.IsAlgClosed.AlgebraicClosure
+import Mathlib.FieldTheory.Minpoly.Field
 
 /-!
 # Algebraic points of a curve
@@ -165,6 +167,9 @@ theorem deg_pos : 0 < x.deg := x.deg_eq ▸ x.P.deg_pos
 theorem exists_P_eq (P : Place K) : ∃ x : QbarPoint K, x.P = P :=
   ⟨⟨P, (IsAlgClosed.lift (R := ℚ) (S := P.ResidueField) (M := AlgebraicClosure ℚ)).toRingHom⟩,
     rfl⟩
+
+instance (P : Place K) : Finite (P.ResidueField →+* AlgebraicClosure ℚ) :=
+  Finite.of_equiv _ RingHom.equivRatAlgHom.symm
 
 /-- Only finitely many points lie over a finite set of places. -/
 theorem finite_setOf_mem {S : Set (Place K)} (hS : S.Finite) :

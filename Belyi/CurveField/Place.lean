@@ -4,6 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.CurveField.Chart
+import Mathlib.RingTheory.DedekindDomain.AdicValuation
+import Mathlib.RingTheory.DedekindDomain.Dvr
+import Mathlib.RingTheory.Valuation.Discrete.IsDiscreteValuationRing
 
 /-!
 # Places of a curve field
@@ -176,8 +179,9 @@ end Abstract
 
 /-! ### Places -/
 
-/-- A place of a field `K`: a valuation subring `O ≠ K` containing `ℚ`. -/
-def Place (K : Type*) [Field K] : Type _ :=
+/-- A place of a field `K`: a valuation subring `O ≠ K` containing `ℚ`.
+(Reducible, so that `P.1` for `P : Place K` is well-typed at every transparency.) -/
+abbrev Place (K : Type*) [Field K] : Type _ :=
   {O : ValuationSubring K // O ≠ ⊤ ∧ ∀ q : ℚ, (q : K) ∈ O}
 
 namespace Place

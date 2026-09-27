@@ -4,6 +4,10 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.CurveField.Basic
+import Mathlib.Algebra.Polynomial.FieldDivision
+import Mathlib.RingTheory.DedekindDomain.IntegralClosure
+import Mathlib.RingTheory.DedekindDomain.PID
+import Mathlib.RingTheory.Valuation.LocalSubring
 
 /-!
 # Affine charts of a curve field
