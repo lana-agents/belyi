@@ -3,6 +3,7 @@ Copyright (c) 2026 The Belyi project contributors. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
+import Belyi.Converse.FEtDescent
 import Belyi.Converse.Normalization
 import Belyi.Converse.NormalizationBaseChange
 import Belyi.Converse.PuncturedLineBelyi
@@ -13,7 +14,8 @@ import Belyi.P1.PointsBaseChange
 
 This file is package (P2c) of the converse of Belyi's theorem
 (`references/converse-rie-design.md`). Assuming the core descent statement (★)
-`Belyi.Converse.FEtDescent k K` (finite étale algebras over `K ⊗[k] R` descend to `R`), we show
+`Belyi.Converse.FEtDescent k K` (`Belyi/Converse/FEtDescent.lean`: finite étale algebras over
+`K ⊗[k] R` descend to `R`), we show
 that a curve `X` over `K` admitting a Belyi map `f : X ⟶ ℙ¹_K` is definable over `k`:
 ```
 X ≅ norm(Y ⟶ ℙ¹_K) ≅ norm(Y₀ ×_k K ⟶ ℙ¹_k ×_k K) ≅ norm(Y₀ ⟶ ℙ¹_k) ×_k K,
@@ -31,7 +33,6 @@ Belyi map over `Spec K` (`Belyi.Converse.exists_isBelyiMap_comp_eq`).
 
 ## Main definitions
 
-* `Belyi.Converse.FEtDescent k K`: the descent statement (★), as a hypothesis.
 * `Belyi.Converse.normalizationIsoOfArrowIso`: relative normalization is invariant under
   isomorphisms of arrows.
 
@@ -50,20 +51,6 @@ universe u
 open AlgebraicGeometry CategoryTheory Limits TensorProduct
 
 namespace Belyi.Converse
-
-/-- **Finite étale descent along `k ⊆ K`** (the core theorem (★) of
-`references/converse-rie-design.md`): every finite étale `K ⊗[k] R`-algebra `B`, for `R` a
-finitely generated `k`-algebra, is the base change `K ⊗[k] B₀` of a finite étale `R`-algebra
-`B₀`, compatibly with the structure maps from `K` and from `R`. -/
-def FEtDescent (k K : Type u) [Field k] [Field K] [Algebra k K] : Prop :=
-  ∀ (R : Type u) [CommRing R] [Algebra k R] [Algebra.FiniteType k R]
-    (B : Type u) [CommRing B] [Algebra (K ⊗[k] R) B] [Algebra.Etale (K ⊗[k] R) B]
-    [Module.Finite (K ⊗[k] R) B],
-    ∃ (B₀ : Type u) (_ : CommRing B₀) (_ : Algebra R B₀) (_ : Algebra k B₀)
-      (_ : IsScalarTower k R B₀) (_ : Algebra.Etale R B₀) (_ : Module.Finite R B₀)
-      (e : K ⊗[k] B₀ ≃+* B),
-      (∀ x : K, e (x ⊗ₜ 1) = algebraMap (K ⊗[k] R) B (x ⊗ₜ 1)) ∧
-      (∀ r : R, e (1 ⊗ₜ algebraMap R B₀ r) = algebraMap (K ⊗[k] R) B (1 ⊗ₜ r))
 
 /-! ### Normalization is invariant under isomorphisms of arrows -/
 
