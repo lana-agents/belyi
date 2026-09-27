@@ -2,8 +2,7 @@
 
 A complete, sorry- and axiom-free formalization of **Belyi's theorem** in Lean 4 building on
 [mathlib](https://github.com/leanprover-community/mathlib4) and on the Riemann existence theorem
-of [oka](https://github.com/lana-agents/oka)
-(with [pi1](https://github.com/lana-agents/pi1), étale fundamental groups, as a further dependency):
+of [oka](https://github.com/lana-agents/oka):
 
 > A smooth projective geometrically connected curve over `ℂ` is definable over `ℚ̄`
 > if and only if it admits a finite morphism to `ℙ¹` whose branch locus is contained
