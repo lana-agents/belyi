@@ -252,7 +252,8 @@ theorem fieldOf_eq_adjoin_kummer (hN : 0 < N) (hu : u ^ N = algebraMap K L φ)
         Place.restrict_restrict]
       exact mul_eq_zero_of_right _ h2)
   have H1 := fieldOf_eq_adjoin_of_pow_eq hN (Place.gen_pow_eq hu)
-    (Place.adjoin_adjoinSimple_gen_eq_top u) (y.restrict K⟮u⟯) (by rw [restrict_P, Place.restrict_restrict]; exact h1)
+    (Place.adjoin_adjoinSimple_gen_eq_top u) (y.restrict K⟮u⟯)
+    (by rw [restrict_P, Place.restrict_restrict]; exact h1)
   have hF0 : ((y.restrict K⟮u⟯).restrict K).fieldOf = (y.restrict K).fieldOf := by
     rw [restrict_restrict]
   have hev : (y.restrict K⟮u⟯).eval (IntermediateField.AdjoinSimple.gen K u)
