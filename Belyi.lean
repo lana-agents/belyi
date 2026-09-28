@@ -122,3 +122,4 @@ import Belyi.CurveField.Fundamental
 import Belyi.CurveField.Divisor
 import Belyi.CurveField.RiemannRochSpace
 import Belyi.CurveField.Riemann
+import Belyi.CurveField.RamIdx
