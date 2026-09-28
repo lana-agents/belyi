@@ -57,6 +57,11 @@ import Belyi.Main
 import Belyi.Marked
 import Belyi.MarkedBaseChange
 import Belyi.MarkedPair
+import Belyi.NoncriticalP1.Analytic
+import Belyi.NoncriticalP1.ElemMap
+import Belyi.NoncriticalP1.Main
+import Belyi.NoncriticalP1.Rational
+import Belyi.NoncriticalP1.Reduction
 import Belyi.P1
 import Belyi.P1.AffineChart
 import Belyi.P1.AffineChart0
