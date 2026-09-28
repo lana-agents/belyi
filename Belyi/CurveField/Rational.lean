@@ -32,7 +32,11 @@ in bijection with `ℚ̄` via `x ↦ t(x)`, and `ℚ(x) = ℚ(t(x))`.
   iff `q(t(x)) ≠ 0`.
 * `Belyi.CurveField.QbarPoint.equivQbar t : {x : QbarPoint K // t ∈ x.P.1} ≃ ℚ̄`.
 * `Belyi.CurveField.QbarPoint.fieldOf_eq_adjoin`: `ℚ(x) = ℚ(t(x))`.
-* `Belyi.CurveField.mem_chartRing_iff`: the chart ring `A_t` is `ℚ[t]`.
+* `Belyi.CurveField.mem_chartRing_iff`: the chart ring `A_t` is `ℚ[t]`;
+  `Belyi.CurveField.forall_mem_iff`: the functions regular at all places containing `t` are
+  the polynomials in `t`.
+* `Belyi.CurveField.Place.equivMonicIrreducible`: the places containing `t` correspond to the
+  monic irreducible polynomials over `ℚ` (the minimal polynomial of the residue of `t`).
 * `Belyi.CurveField.infPlace t`: the unique place with `t ∉ O_P` (the point at infinity);
   it has degree one and `ord_∞ t = -1`, and carries exactly one algebraic point.
 -/
@@ -462,5 +466,74 @@ theorem existsUnique_P_eq_infPlace : ∃! x : QbarPoint K, x.P = infPlace t := b
   rw [eval_inv_eq_zero_of_P_eq ht hy, eval_inv_eq_zero_of_P_eq ht hx]
 
 end QbarPoint
+
+/-! ### Places of the affine line and irreducible polynomials -/
+
+namespace Place
+
+omit ht in
+/-- The minimal polynomial over `ℚ` of the residue of `t` at a place containing `t`. -/
+noncomputable def minpolyAt (P : Place K) (hP : t ∈ P.1) : ℚ[X] :=
+  minpoly ℚ (P.residue ⟨t, hP⟩)
+
+omit ht in
+theorem minpolyAt_monic (P : Place K) (hP : t ∈ P.1) : (P.minpolyAt hP).Monic :=
+  minpoly.monic (Algebra.IsIntegral.isIntegral _)
+
+omit ht in
+theorem minpolyAt_irreducible (P : Place K) (hP : t ∈ P.1) : Irreducible (P.minpolyAt hP) :=
+  minpoly.irreducible (Algebra.IsIntegral.isIntegral _)
+
+omit ht [IsCurveField K] in
+/-- The minimal polynomial of `t` at `x.P` is the minimal polynomial of `t(x)`. -/
+theorem _root_.Belyi.CurveField.QbarPoint.minpolyAt_P (x : QbarPoint K) (hx : t ∈ x.P.1) :
+    x.P.minpolyAt hx = minpoly ℚ (x.eval t hx) :=
+  (minpoly.algHom_eq x.σ.toRatAlgHom x.σ.injective _).symm
+
+omit ht in
+/-- A root `z` of the minimal polynomial of `t` at `P` is `t(x)` for a point `x` over `P`. -/
+theorem exists_P_eq_eval_eq (P : Place K) (hP : t ∈ P.1) {z : Qbar}
+    (hz : aeval z (P.minpolyAt hP) = 0) :
+    ∃ x : QbarPoint K, ∃ hx : x.P = P, x.eval t (hx ▸ hP) = z := by
+  obtain ⟨x₀, rfl⟩ := QbarPoint.exists_P_eq P
+  have hmin : minpoly ℚ z = minpoly ℚ (x₀.eval t hP) := by
+    rw [← x₀.minpolyAt_P hP]
+    exact (minpoly.eq_of_irreducible_of_monic (x₀.P.minpolyAt_irreducible hP) hz
+      (x₀.P.minpolyAt_monic hP)).symm
+  obtain ⟨τ, hτ⟩ := (Normal.minpoly_eq_iff_mem_orbit (F := ℚ) (E := Qbar)).mp hmin
+  exact ⟨⟨x₀.P, (τ : Qbar →+* Qbar).comp x₀.σ⟩, rfl, hτ⟩
+
+/-- The places containing `t` correspond to the monic irreducible polynomials over `ℚ`, via
+the minimal polynomial of the residue of `t`. -/
+noncomputable def equivMonicIrreducible :
+    {P : Place K // t ∈ P.1} ≃ {m : ℚ[X] // m.Monic ∧ Irreducible m} where
+  toFun P := ⟨P.1.minpolyAt P.2, P.1.minpolyAt_monic P.2, P.1.minpolyAt_irreducible P.2⟩
+  invFun m := ⟨((QbarPoint.equivQbar ht).symm
+      (IsAlgClosed.exists_aeval_eq_zero (k := Qbar) m.1
+        (degree_pos_of_irreducible m.2.2).ne').choose).1.P,
+    ((QbarPoint.equivQbar ht).symm _).2⟩
+  left_inv P := by
+    obtain ⟨P, hP⟩ := P
+    set z := (IsAlgClosed.exists_aeval_eq_zero (k := Qbar) (P.minpolyAt hP)
+      (degree_pos_of_irreducible (P.minpolyAt_irreducible hP)).ne').choose
+    have hz : aeval z (P.minpolyAt hP) = 0 :=
+      (IsAlgClosed.exists_aeval_eq_zero (k := Qbar) (P.minpolyAt hP)
+        (degree_pos_of_irreducible (P.minpolyAt_irreducible hP)).ne').choose_spec
+    obtain ⟨x, rfl, hxz⟩ := P.exists_P_eq_eval_eq hP hz
+    refine Subtype.ext ?_
+    change ((QbarPoint.equivQbar ht).symm z).1.P = x.P
+    have : (QbarPoint.equivQbar ht).symm z = ⟨x, hP⟩ :=
+      (QbarPoint.equivQbar ht).symm_apply_eq.mpr hxz.symm
+    rw [this]
+  right_inv m := by
+    obtain ⟨m, hm, hirr⟩ := m
+    refine Subtype.ext ?_
+    set h := IsAlgClosed.exists_aeval_eq_zero (k := Qbar) m (degree_pos_of_irreducible hirr).ne'
+    set x := (QbarPoint.equivQbar ht).symm h.choose
+    change x.1.P.minpolyAt x.2 = m
+    rw [x.1.minpolyAt_P x.2, QbarPoint.eval_equivQbar_symm]
+    exact (minpoly.eq_of_irreducible_of_monic hirr h.choose_spec hm).symm
+
+end Place
 
 end Belyi.CurveField
