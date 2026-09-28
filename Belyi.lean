@@ -109,3 +109,5 @@ import Belyi.CurveField.Residue
 import Belyi.CurveField.ZerosPoles
 import Belyi.CurveField.Point
 import Belyi.CurveField.Degree
+import Belyi.CurveField.Divisor
+import Belyi.CurveField.RiemannRochSpace
