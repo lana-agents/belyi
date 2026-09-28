@@ -129,3 +129,7 @@ import Belyi.CurveField.RamIdx
 import Belyi.CurveField.Canonical
 import Belyi.CurveField.BelyiRelation
 import Belyi.CurveField.Hurwitz
+import Belyi.CurveField.NoncriticalBasic
+import Belyi.CurveField.NoncriticalElem
+import Belyi.CurveField.NoncriticalFinite
+import Belyi.CurveField.Noncritical
