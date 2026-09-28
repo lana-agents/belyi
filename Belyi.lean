@@ -35,6 +35,9 @@ import Belyi.Curve.SmoothRelDimDescent
 import Belyi.Curve.SmoothStalk
 import Belyi.Curve.Stalks
 import Belyi.Curve.ToP1
+import Belyi.CurveDeriv.Basic
+import Belyi.CurveDeriv.Local
+import Belyi.CurveDeriv.Order
 import Belyi.Definable
 import Belyi.DefinablePair
 import Belyi.DefinablePairBranch
