@@ -34,6 +34,8 @@ kernel `L(A)`, so adding a place `P` increases the dimension by at most `deg P`;
 * `Belyi.CurveField.Divisor.ell_le_of_le`: `ℓ(B) ≤ ℓ(A) + (deg B - deg A)` for `A ≤ B`.
 * `Belyi.CurveField.Divisor.ell_add_div`: `ℓ(A + div z) = ℓ(A)`.
 * `Belyi.CurveField.Divisor.ell_le_max`: `ℓ(A) ≤ max 0 (deg A + ℓ(0))`.
+* `Belyi.CurveField.Divisor.L_zero`, `Belyi.CurveField.Divisor.ell_zero`: `L(0)` is the
+  constant field `k` (the integral closure of `ℚ` in `K`), so `ℓ(0) = [k : ℚ]`.
 -/
 
 open IsLocalRing
@@ -332,6 +334,32 @@ theorem ell_le_max (A : Divisor K) : (ell A : ℤ) ≤ max 0 (A.deg + ell (0 : D
   have := ell_le_of_le hA
   rw [ell_add_div A hz, deg_add, deg_div, deg_zero] at this
   exact (by omega : (ell A : ℤ) ≤ A.deg + ell (0 : Divisor K)).trans (le_max_right _ _)
+
+/-! ### The space of constants -/
+
+/-- `L(0)` is the field of constants: the elements of `K` algebraic over `ℚ`. -/
+theorem mem_L_zero {f : K} : f ∈ L (0 : Divisor K) ↔ IsAlgebraic ℚ f := by
+  rw [Place.isAlgebraic_iff_forall_mem, mem_L]
+  simp only [Finsupp.coe_zero, Pi.zero_apply, neg_zero]
+  constructor
+  · rintro (rfl | h) P
+    · exact P.1.zero_mem
+    · exact P.mem_of_ord_nonneg (h P)
+  · exact fun h ↦ Or.inr fun P ↦ P.ord_nonneg_of_mem (h P)
+
+theorem L_zero : L (0 : Divisor K) = Subalgebra.toSubmodule (integralClosure ℚ K) := by
+  ext f
+  rw [mem_L_zero, Subalgebra.mem_toSubmodule, mem_integralClosure_iff,
+    isAlgebraic_iff_isIntegral]
+
+/-- `ℓ(0) = [k : ℚ]` for the constant field `k` (the integral closure of `ℚ` in `K`). -/
+theorem ell_zero : ell (0 : Divisor K) = Module.finrank ℚ (integralClosure ℚ K) := by
+  rw [ell, L_zero]
+  rfl
+
+theorem ell_zero_pos : 0 < ell (0 : Divisor K) := by
+  rw [Nat.pos_iff_ne_zero, Ne, ell_eq_zero_iff, ← Ne, Submodule.ne_bot_iff]
+  exact ⟨1, mem_L_zero.mpr isAlgebraic_one, one_ne_zero⟩
 
 end Divisor
 

@@ -111,3 +111,4 @@ import Belyi.CurveField.Point
 import Belyi.CurveField.Degree
 import Belyi.CurveField.Divisor
 import Belyi.CurveField.RiemannRochSpace
+import Belyi.CurveField.Riemann
