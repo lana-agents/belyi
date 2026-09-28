@@ -125,3 +125,4 @@ import Belyi.CurveField.Riemann
 import Belyi.CurveField.NoncriticalBasic
 import Belyi.CurveField.NoncriticalElem
 import Belyi.CurveField.NoncriticalFinite
+import Belyi.CurveField.Noncritical
