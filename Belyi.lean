@@ -134,3 +134,5 @@ import Belyi.CurveField.NoncriticalElem
 import Belyi.CurveField.NoncriticalFinite
 import Belyi.CurveField.Noncritical
 import Belyi.CurveField.NoncriticalBridge
+import Belyi.CurveField.KummerStep
+import Belyi.CurveField.Kummer
