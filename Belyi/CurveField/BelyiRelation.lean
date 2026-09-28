@@ -98,8 +98,8 @@ theorem canonicalDiv_add_cuspDivisor {φ : K} (hφ : IsBelyi φ) :
     rcases h0.lt_or_eq with hpos | hzero
     · -- a zero of `φ`
       have hord1 : P.ord (φ - 1) = 0 := by
-        rw [sub_eq_neg_add, P.ord_add_eq_of_lt hm1 hφ0 (by rw [Place.ord_neg, Place.ord_one]; exact hpos),
-          Place.ord_neg, Place.ord_one]
+        rw [sub_eq_neg_add, P.ord_add_eq_of_lt hm1 hφ0
+          (by rw [Place.ord_neg, Place.ord_one]; exact hpos), Place.ord_neg, Place.ord_one]
       have hres : P.residue ⟨φ, h⟩ = algebraMap ℚ P.ResidueField 0 := by
         rw [map_zero]; exact (residue_eq_zero_iff_ord_pos h hφ0).mpr hpos
       rw [ramIdx_of_residue_eq h hres, map_zero, sub_zero,
@@ -132,7 +132,8 @@ theorem canonicalDiv_add_cuspDivisor {φ : K} (hφ : IsBelyi φ) :
   · -- a pole of `φ`
     have hneg := (P.ord_neg_iff).mpr h
     have hord1 : P.ord (φ - 1) = P.ord φ := by
-      rw [sub_eq_add_neg, P.ord_add_eq_of_lt hφ0 hm1 (by rw [Place.ord_neg, Place.ord_one]; exact hneg)]
+      rw [sub_eq_add_neg,
+        P.ord_add_eq_of_lt hφ0 hm1 (by rw [Place.ord_neg, Place.ord_one]; exact hneg)]
     rw [canonicalDiv_apply_of_notMem h, polarDivisor_apply_eq_ramIdx h, ramIdx_of_notMem h,
       cuspDivisor_apply_of_mem (Or.inl hneg.ne), hord1]
     ring
