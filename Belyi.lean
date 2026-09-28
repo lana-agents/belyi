@@ -111,3 +111,4 @@ import Belyi.CurveField.Point
 import Belyi.CurveField.Degree
 import Belyi.CurveField.Extension
 import Belyi.CurveField.Rational
+import Belyi.CurveField.Tripod
