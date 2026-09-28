@@ -123,3 +123,4 @@ import Belyi.CurveField.Divisor
 import Belyi.CurveField.RiemannRochSpace
 import Belyi.CurveField.Riemann
 import Belyi.CurveField.RamIdx
+import Belyi.CurveField.Canonical
