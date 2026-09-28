@@ -125,3 +125,7 @@ import Belyi.CurveField.Riemann
 import Belyi.CurveField.Rational
 import Belyi.CurveField.Tripod
 import Belyi.CurveField.CoordRing
+import Belyi.CurveField.RamIdx
+import Belyi.CurveField.Canonical
+import Belyi.CurveField.BelyiRelation
+import Belyi.CurveField.Hurwitz
