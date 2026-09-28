@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: The Belyi project contributors
 -/
 import Belyi.CurveField.Point
+import Belyi.CurveField.RamIdx
 import Belyi.NoncriticalP1.ElemMap
 
 /-!
@@ -42,28 +43,6 @@ namespace Place
 
 variable {K : Type*} [Field K] [CharZero K] (P : Place K)
 
-theorem aeval_mem {f : K} (hf : f ∈ P.1) (p : ℚ[X]) : aeval f p ∈ P.1 := by
-  induction p using Polynomial.induction_on with
-  | C q => simpa using P.algebraMap_mem q
-  | add p q hp hq => rw [map_add]; exact add_mem hp hq
-  | monomial n q hq =>
-    rw [pow_succ, ← mul_assoc, map_mul, aeval_X]
-    exact mul_mem hq hf
-
-/-- The residue of `p(f)` is `p` evaluated at the residue of `f`. -/
-theorem residue_aeval {f : K} (hf : f ∈ P.1) (p : ℚ[X]) :
-    P.residue ⟨aeval f p, P.aeval_mem hf p⟩ = aeval (P.residue ⟨f, hf⟩) p := by
-  let F : ℚ[X] →+* P.1 := (aeval f).toRingHom.codRestrict P.1 (P.aeval_mem hf)
-  have key : P.residue.comp F = (aeval (P.residue ⟨f, hf⟩)).toRingHom := by
-    refine Polynomial.ringHom_ext (fun q ↦ ?_) ?_
-    · simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, aeval_C]
-      have : F (C q) = P.ratHom q := Subtype.ext (by simp [F])
-      rw [this, residue_ratHom, eq_ratCast]
-    · simp only [RingHom.comp_apply, AlgHom.toRingHom_eq_coe, RingHom.coe_coe, aeval_X]
-      congr 1
-      exact Subtype.ext (by simp [F])
-  exact congrArg (· p) key
-
 variable [IsCurveField K]
 
 /-- A regular function with nonzero residue is a unit. -/
@@ -85,9 +64,6 @@ theorem residue_eq_zero_of_ord_pos {y : K} (hy : 0 < P.ord y) :
     P.residue ⟨y, P.mem_of_ord_nonneg hy.le⟩ = 0 := by
   have hy0 : y ≠ 0 := by rintro rfl; simp at hy
   exact (P.residue_eq_zero_iff).mpr ((P.ord_pos_iff_mem_maximalIdeal (a := ⟨y, _⟩) hy0).mp hy)
-
-theorem isIntegral_residue (a : P.1) : IsIntegral ℚ (P.residue a) :=
-  Algebra.IsIntegral.isIntegral _
 
 end Place
 
