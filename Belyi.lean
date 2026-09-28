@@ -124,3 +124,5 @@ import Belyi.CurveField.RiemannRochSpace
 import Belyi.CurveField.Riemann
 import Belyi.CurveField.Rational
 import Belyi.CurveField.Tripod
+import Belyi.CurveField.KummerStep
+import Belyi.CurveField.Kummer
