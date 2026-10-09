@@ -1,0 +1,179 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+# formalization.yaml (v0.4): repo-root metadata for this formalization,
+# following https://github.com/mathlib-initiative/formalization.yaml
+
+version: "v0.4"
+
+project:
+  name: "belyi"
+  description: >-
+    A Lean 4 / Mathlib formalization of Belyi's theorem and of Mochizuki's noncritical Belyi maps.
+    Scheme-theoretically: a smooth projective geometrically connected curve over an algebraically
+    closed field K of characteristic zero (e.g. ℂ) is definable over ℚ̄ if and only if it admits a
+    finite morphism to ℙ¹ branched only over {0, 1, ∞}. Both directions are proved, the converse via
+    the Riemann existence theorem of lana-agents/oka, together with invariance under base change and
+    isomorphism and a marked-curve form sending a prescribed finite set of closed points into
+    {0, 1, ∞}. Independently, curves over number fields are treated through their function fields
+    (places, divisors, Riemann's theorem, canonical divisors and Riemann–Hurwitz, the Belyi relation,
+    Kummer–Fermat coverings), and Mochizuki's noncritical Belyi maps are proved in the case S = ∅:
+    for every finite set T of places there is a Belyi function none of whose cusps lies in T.
+  authors:
+    - "Claude (Anthropic)"
+    - "LANA Project"
+  responsible_maintainers:
+    - "Christian Merten"
+  license: "Apache-2.0"
+
+sources:
+  - title: "On Galois extensions of a maximal cyclotomic field"
+    authors: ["G. V. Belyi"]
+    type: "article"
+    location: "Izv. Akad. Nauk SSSR Ser. Mat. 43 (1979), 267-276"
+    relationship: "formalizes"
+    note: >-
+      Belyi's theorem. The forward direction (definable over ℚ̄ ⇒ Belyi map) follows the polynomial
+      reduction argument; the converse uses the Riemann existence theorem (via lana-agents/oka) and
+      descent of finite étale covers. The proof outline with statement labels is
+      references/proof-outline.md.
+    author_endorsement: "n/a"
+  - title: "Noncritical Belyi maps"
+    authors: ["Shinichi Mochizuki"]
+    type: "article"
+    location: "Math. J. Okayama Univ. 46 (2004), Lemmas 2.1-2.4 and Theorem 2.5"
+    relationship: "formalizes"
+    note: "Only the case S = ∅ of Theorem 2.5 is formalized (see fidelity.divergences)."
+    author_endorsement: "not-contacted"
+  - title: "Revêtements étales et groupe fondamental (SGA 1), Exposé XII"
+    authors: ["Alexander Grothendieck", "Michèle Raynaud"]
+    id: "arXiv:math/0206203"
+    type: "book"
+    location: "Exposé XII, Théorème 5.1 (Riemann existence theorem)"
+    relationship: "background"
+    note: "Used through its formalization in lana-agents/oka, not re-proved here."
+    author_endorsement: "n/a"
+
+related_formalizations:
+  - id: "https://github.com/lana-agents/oka"
+    relationship: "builds-on"
+    note: >-
+      Lake dependency (pinned da228a2); the converse of Belyi's theorem uses oka's Riemann existence
+      theorem.
+  - id: "https://github.com/lana-agents/heights"
+    relationship: "other"
+    note: "Used by: heights requires belyi at 9ce4d3f for Belyi.CurveField."
+  - id: "https://github.com/lana-agents/genl"
+    relationship: "other"
+    note: >-
+      Used by the lana-agents fork of genl through heights (height theory of curves and the Belyi
+      descent of Genl.Curves).
+  - id: "https://github.com/lana-agents/iut"
+    relationship: "other"
+    note: "iut pins belyi at 9ce4d3f as a transitive dependency; it does not use the library directly."
+
+classification:
+  arxiv: ["math.AG", "math.NT"]
+  msc2020: ["14H25", "14H30", "11G32", "14H05"]
+
+status:
+  scope: >-
+    Belyi's theorem (both directions) for curves over an algebraically closed field of
+    characteristic zero with field of definition ℚ̄, its marked-curve form, and Mochizuki's
+    noncritical Belyi maps (Theorem 2.5 with S = ∅) both on ℙ¹(ℚ̄) and for function fields of curves
+    over number fields, with the supporting theory of places, divisors, Riemann's theorem,
+    Riemann–Hurwitz, the Belyi relation and Kummer–Fermat coverings. No sorry and no axiom
+    declarations.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+  main_results:
+    - declaration: "Belyi.belyi_iff"
+      file: "Belyi/Main.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      literature_dependencies: []
+    - declaration: "Belyi.exists_isBelyiMap_marked_of_isCurveOver"
+      file: "Belyi/Marked.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      literature_dependencies: []
+    - declaration: "Belyi.NoncriticalP1.exists_isNoncriticalBelyi"
+      file: "Belyi/NoncriticalP1/Main.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      literature_dependencies: []
+    - declaration: "Belyi.CurveField.exists_isBelyi_notMem_belyiCusps"
+      file: "Belyi/CurveField/NoncriticalBridge.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      literature_dependencies: []
+    - declaration: "Belyi.CurveField.canonicalDiv_add_cuspDivisor"
+      file: "Belyi/CurveField/BelyiRelation.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      literature_dependencies: []
+    - declaration: "Belyi.CurveField.Divisor.riemann_equality"
+      file: "Belyi/CurveField/Riemann.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      literature_dependencies: []
+    - declaration: "Belyi.CurveField.Place.sum_ramificationIdx_mul_deg"
+      file: "Belyi/CurveField/Fundamental.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      literature_dependencies: []
+    - declaration: "Belyi.CurveField.Place.adjoin_residue_kummer_eq_top"
+      file: "Belyi/CurveField/Kummer.lean"
+      sorry_count: 0
+      axioms: ["propext", "Classical.choice", "Quot.sound"]
+      literature_dependencies: []
+
+automation:
+  methods:
+    - method: "agent"
+      models: ["claude-opus-4-8", "claude-fable-5", "claude-opus-5-5"]
+      framework: "Claude Code"
+      tool_setup: >-
+        orchestra for running the agents, taxis for project management, and Claude (Claude Code) as the
+        coding agent; Lean/Lake builds with `lake build --wfail`.
+      prompting_notes: >-
+        Human input consisted of high-level task descriptions and scope decisions.
+  notes: >-
+    Agents were run with orchestra; project management (issues, status) was done in taxis;
+    Claude was the coding agent.
+
+fidelity:
+  divergences: >-
+    Belyi's theorem is stated for an algebraically closed field K of characteristic zero over an
+    algebraic, algebraically closed subfield k (k = ℚ̄, K = ℂ being the classical case);
+    definability over k is DefinableOver k K X and a Belyi map is a finite morphism to ℙ¹_K whose
+    branch locus lies in {0, 1, ∞}. Curves over number fields are represented by their function
+    fields (IsCurveField: finite over ℚ⟮t⟯), with Riemann's theorem stated with a constant
+    riemannConst K in place of g - 1. Only the case S = ∅ of Mochizuki's Theorem 2.5 is formalized,
+    and no bridge between IsCurveField and the scheme-theoretic IsCurveOver is formalized.
+
+review:
+  status: "agent-reviewed"
+  reviewers: ["Claude (Anthropic)"]
+  notes: >-
+    The formalization has only been reviewed by Claude; it has not been reviewed by a human.
+    All results are machine-checked by the Lean kernel; `#print axioms` of every main result listed
+    under status (checked on a build of this revision) gives only propext, Classical.choice and
+    Quot.sound, and `git grep` finds no sorry, axiom declaration or native_decide.
+
+alignment:
+  namespace: "Belyi"
+  statements:
+    - source: "Belyi 1979: a curve over ℂ is definable over ℚ̄ iff it admits a Belyi map"
+      lean: "Belyi.belyi_iff"
+      module: "Belyi/Main.lean"
+      status: "proved"
+    - source: "Mochizuki, Noncritical Belyi maps, Theorem 2.5 for ℙ¹ (S = ∅)"
+      lean: "Belyi.NoncriticalP1.exists_isNoncriticalBelyi"
+      module: "Belyi/NoncriticalP1/Main.lean"
+      status: "proved"
+    - source: "Mochizuki, Noncritical Belyi maps, Theorem 2.5 (S = ∅), curves over number fields"
+      lean: "Belyi.CurveField.exists_isBelyi_notMem_belyiCusps"
+      module: "Belyi/CurveField/NoncriticalBridge.lean"
+      status: "proved"
+
+acknowledgements: "Built on Mathlib (Apache-2.0)."

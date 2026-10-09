@@ -183,3 +183,5 @@ builds the height theory of curves over number fields and the Belyi descent of t
 the Belyi relation and the Kummer–Fermat coverings. [lana-agents/iut](https://github.com/lana-agents/iut)
 pins `belyi` at `9ce4d3f` in its `lake-manifest.json` as a transitive dependency; it does not
 use the library directly.
+
+License: Apache 2.0 (see LICENSE)
