@@ -31,9 +31,11 @@ def coordRing (D : Finset (Place K)) : Subalgebra ℚ K where
   add_mem' hf hg P hP := add_mem (hf P hP) (hg P hP)
   algebraMap_mem' q P _ := P.algebraMap_mem q
 
+omit [IsCurveField K] in
 theorem mem_coordRing {D : Finset (Place K)} {f : K} :
     f ∈ coordRing D ↔ ∀ P : Place K, P ∉ D → f ∈ P.1 := Iff.rfl
 
+omit [IsCurveField K] in
 /-- The chart ring `A_t` consists of the functions regular at all places where `t` is. -/
 theorem mem_chartRing_iff_forall {t : K} [Fact (Transcendental ℚ t)] (f : K) :
     f ∈ chartRing t ↔ ∀ P : Place K, t ∈ P.1 → f ∈ P.1 := by
@@ -87,14 +89,14 @@ theorem exists_notMem_iff_mem (D : Finset (Place K)) (hD : D.Nonempty) :
       omega
     nlinarith
   have hnonneg : 0 ≤ n • A₀ := fun P => by
-    simp only [Finsupp.smul_apply, Finsupp.coe_zero, Pi.zero_apply, smul_eq_mul]
+    simp only [Finsupp.smul_apply, Finsupp.coe_zero, Pi.zero_apply]
     exact mul_nonneg (Nat.cast_nonneg _) (hA₀nonneg P)
   obtain ⟨t, ht⟩ := hN1 (n • A₀) hnonneg hdeg
   have hpole : ∀ P : Place K, t ∉ P.1 ↔ P ∈ D := by
     intro P
     rw [← P.ord_neg_iff]
     have h := congrArg (fun A : Divisor K => A P) ht
-    simp only [polarDivisor_apply, Finsupp.smul_apply, smul_eq_mul, hA₀P] at h
+    simp only [polarDivisor_apply, Finsupp.smul_apply, hA₀P] at h
     constructor
     · intro hlt
       by_contra hPD
@@ -113,6 +115,7 @@ theorem exists_notMem_iff_mem (D : Finset (Place K)) (hD : D.Nonempty) :
   have hmem : t ∈ P₀.1 := P₀.mem_of_isAlgebraic halg
   exact (hpole P₀).mpr hP₀ hmem
 
+omit [IsCurveField K] in
 /-- The coordinate ring of `X ∖ D` is the chart ring of a function with poles exactly `D`. -/
 theorem coordRing_eq_chartRing {D : Finset (Place K)} {t : K} [Fact (Transcendental ℚ t)]
     (ht : ∀ P : Place K, t ∉ P.1 ↔ P ∈ D) (f : K) : f ∈ coordRing D ↔ f ∈ chartRing t := by
