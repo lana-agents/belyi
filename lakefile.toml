@@ -17,7 +17,7 @@ rev = "v4.32.0"
 [[require]]
 name = "oka"
 git = "https://github.com/lana-agents/oka.git"
-rev = "da228a2cf9671aaba08ddc96274d75e098b28f67"
+rev = "e162b3ba74be365a04713d03b0d1de5aaaef9b20"
 
 [[lean_lib]]
 name = "Belyi"

@@ -115,6 +115,11 @@ Everything below is sorry-free and axiom-free (no `sorry` and no `axiom` in `Bel
   `Belyi/Converse/NormalizationBaseChange.lean` — (P2) a curve is the normalization of `ℙ¹` in
   a dense open; normalization commutes with base change along field extensions.
 * `Belyi/Converse/DefinableOfBelyi.lean`, `Belyi/Converse/Main.lean` — **B12**, the converse.
+* `Belyi/Converse/Pi1Invariance.lean` — **invariance of `π₁ᵉᵗ`** under extension of
+  algebraically closed fields, affine case: for `k ⊆ Ω` algebraically closed of characteristic
+  zero with `k` algebraic over `ℚ` and `X = Spec R` connected of finite type over `k`,
+  `π₁ᵉᵗ(X_Ω) ≃ₜ* π₁ᵉᵗ(X)` (`AlgebraicGeometry.FiniteEtale.fundamentalGroupBaseChangeEquiv`).
+  Injectivity is (★) fed into pi1's Galois-category criterion; surjectivity is pi1's.
 
 **Main theorem**
 
