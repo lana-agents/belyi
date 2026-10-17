@@ -21,6 +21,7 @@ import Belyi.BelyiMap
 import Belyi.Converse.AnalyticProduct
 import Belyi.Converse.BaseChange
 import Belyi.Converse.Basic
+import Belyi.Converse.BranchedCurve
 import Belyi.Converse.BranchedPi1
 import Belyi.Converse.ConstantFamily
 import Belyi.Converse.CoveringHomotopy
