@@ -22,14 +22,16 @@ marked form of Belyi's theorem (`Belyi.exists_isBelyiMap_marked_of_isCurveOver`,
 `X̄ ∖ U` are sent into `{0, 1, ∞}`) and the étaleness of a Belyi map over the thrice-punctured
 line (`Belyi.IsBelyiMap.etale_morphismRestrict_puncturedLine`):
 
-* `Belyi.Anabelian.exists_belyi_open_le`: for a curve `X̄` over `k` and a nonempty open `U ⊆ X̄`
-  with finite complement, there is a Belyi map `f : X̄ ⟶ ℙ¹` such that
+* `Belyi.Anabelian.finite_compl_of_isCurveOver`: a nonempty open of a curve has finite
+  complement;
+* `Belyi.Anabelian.exists_belyi_open_le`: for a curve `X̄` over `k` and a nonempty open `U ⊆ X̄`,
+  there is a Belyi map `f : X̄ ⟶ ℙ¹` such that
   `W = f⁻¹(ℙ¹ ∖ {0, 1, ∞})` is a nonempty open contained in `U` and `f|_W : W ⟶ ℙ¹ ∖ {0, 1, ∞}` is
   finite étale;
 * `Belyi.Anabelian.HypCurve.exists_belyi_open_le`: the same for a hyperbolic curve.
 
 The version over a number field `k'` ("by replacing `k'` by some finite extension", l.4636)
-needs the descent of the Belyi map from `ℚ̄` to a number field (MR8.4b, not done here).
+is `Belyi.Anabelian.exists_belyi_open_le_finSub` (`Belyi/Anabelian/BelyiInputNumberField.lean`).
 -/
 
 universe u
@@ -38,15 +40,39 @@ open AlgebraicGeometry CategoryTheory
 
 namespace Belyi.Anabelian
 
+/-- On a curve `X` over a field, a nonempty open subscheme has finite complement: the complement
+is a closed set avoiding the generic point, hence (`X` being noetherian of dimension one) a finite
+union of closed points. -/
+theorem finite_compl_of_isCurveOver {k : Type u} [Field k] [PerfectField k] (X : Scheme.{u})
+    [X.Over (Spec (.of k))] [IsCurveOver k X] (U : X.Opens) (hU : (U : Set X).Nonempty) :
+    (U : Set X)ᶜ.Finite := by
+  haveI := IsCurveOver.isIntegral k X
+  haveI : IsNoetherian X := isNoetherian_of_over X (Spec (CommRingCat.of k))
+  have hgen : genericPoint X ∈ U :=
+    ((genericPoint_spec X).mem_open_set_iff U.isOpen).2 (by simpa using hU)
+  have hcl : ∀ s ∈ (U : Set X)ᶜ, IsClosed ({s} : Set X) := fun s hs ↦
+    isClosed_singleton_of_ne_genericPoint (krullDimLE_one_stalk_of_isCurveOver k X)
+      fun h ↦ hs (h ▸ hgen)
+  obtain ⟨S, hSfin, hScl, hSirr, hSeq⟩ :=
+    TopologicalSpace.NoetherianSpace.exists_finite_set_isClosed_irreducible U.isOpen.isClosed_compl
+  rw [hSeq]
+  refine hSfin.sUnion fun T hT ↦ ?_
+  have hη := IsIrreducible.isGenericPoint_genericPoint (hSirr T hT) (hScl T hT)
+  have hηT : (hSirr T hT).genericPoint ∈ (U : Set X)ᶜ :=
+    hSeq ▸ Set.mem_sUnion_of_mem hη.mem hT
+  rw [← hη.def, (hcl _ hηT).closure_eq]
+  exact Set.finite_singleton _
+
 variable (k : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
 
 /-- **[AbsTopII] Example 3.6 (i) over `ℚ̄`.** For a curve `X̄` over `k = ℚ̄` and a nonempty open
-`U ⊆ X̄` with finite complement, there is a Belyi map `f : X̄ ⟶ ℙ¹_k` such that
-`W = f⁻¹(ℙ¹ ∖ {0, 1, ∞})` is a nonempty open subscheme of `U` and `f|_W : W ⟶ ℙ¹ ∖ {0, 1, ∞}` is
-finite étale. -/
+`U ⊆ X̄` (its complement is automatically finite, `finite_compl_of_isCurveOver`), there is a Belyi
+map `f : X̄ ⟶ ℙ¹_k` over `k` such that `W = f⁻¹(ℙ¹ ∖ {0, 1, ∞})` is a nonempty open subscheme of
+`U` and `f|_W : W ⟶ ℙ¹ ∖ {0, 1, ∞}` is finite étale. -/
 theorem exists_belyi_open_le (X : Scheme.{u}) [X.Over (Spec (.of k))] [IsCurveOver k X]
-    (U : X.Opens) (hU : (U : Set X).Nonempty) (hfin : (U : Set X)ᶜ.Finite) :
-    ∃ f : X ⟶ P1 k, IsBelyiMap k f ∧ f ⁻¹ᵁ puncturedLine k ≤ U ∧
+    (U : X.Opens) (hU : (U : Set X).Nonempty) :
+    ∃ f : X ⟶ P1 k, IsBelyiMap k f ∧ f ≫ (P1 k ↘ Spec (.of k)) = X ↘ Spec (.of k) ∧
+      f ⁻¹ᵁ puncturedLine k ≤ U ∧
       ((f ⁻¹ᵁ puncturedLine k : X.Opens) : Set X).Nonempty ∧
       IsFinite (f ∣_ puncturedLine k) ∧ Etale (f ∣_ puncturedLine k) := by
   haveI := IsCurveOver.isIntegral k X
@@ -55,20 +81,23 @@ theorem exists_belyi_open_le (X : Scheme.{u}) [X.Over (Spec (.of k))] [IsCurveOv
   have hcl : ∀ s ∈ (U : Set X)ᶜ, IsClosed ({s} : Set X) := fun s hs ↦
     isClosed_singleton_of_ne_genericPoint (krullDimLE_one_stalk_of_isCurveOver k X)
       fun h ↦ hs (h ▸ hgen)
-  obtain ⟨f, hf, hmark⟩ := exists_isBelyiMap_marked_of_isCurveOver k X _ hfin hcl
+  obtain ⟨f, hf, hmark, hover⟩ := exists_isBelyiMap_marked_isOver_of_isCurveOver k X _
+    (finite_compl_of_isCurveOver (k := k) X U hU) hcl
   haveI := hf.isFinite
-  refine ⟨f, hf, fun x hx ↦ ?_, ⟨genericPoint X, genericPoint_mem_preimage_puncturedLine hf⟩,
+  refine ⟨f, hf, hover, fun x hx ↦ ?_,
+    ⟨genericPoint X, genericPoint_mem_preimage_puncturedLine hf⟩,
     inferInstance, hf.etale_morphismRestrict_puncturedLine⟩
   by_contra hxU
   exact hx (hmark x hxU)
 
 /-- **[AbsTopII] Example 3.6 (i) for hyperbolic curves over `ℚ̄`**: for `U ⊆ X̄` a hyperbolic curve
-there is a Belyi map `f : X̄ ⟶ ℙ¹` with `W = f⁻¹(ℙ¹ ∖ {0, 1, ∞}) ⊆ U` nonempty and `f|_W` finite
-étale onto `ℙ¹ ∖ {0, 1, ∞}`. -/
+there is a Belyi map `f : X̄ ⟶ ℙ¹` over `k` with `W = f⁻¹(ℙ¹ ∖ {0, 1, ∞}) ⊆ U` nonempty and `f|_W`
+finite étale onto `ℙ¹ ∖ {0, 1, ∞}`. -/
 theorem HypCurve.exists_belyi_open_le (C : HypCurve k) :
-    ∃ f : C.Xbar ⟶ P1 k, IsBelyiMap k f ∧ f ⁻¹ᵁ puncturedLine k ≤ C.U ∧
+    ∃ f : C.Xbar ⟶ P1 k, IsBelyiMap k f ∧
+      f ≫ (P1 k ↘ Spec (.of k)) = C.Xbar ↘ Spec (.of k) ∧ f ⁻¹ᵁ puncturedLine k ≤ C.U ∧
       ((f ⁻¹ᵁ puncturedLine k : C.Xbar.Opens) : Set C.Xbar).Nonempty ∧
       IsFinite (f ∣_ puncturedLine k) ∧ Etale (f ∣_ puncturedLine k) :=
-  Belyi.Anabelian.exists_belyi_open_le k C.Xbar C.U C.nonempty C.cusps_finite
+  Belyi.Anabelian.exists_belyi_open_le k C.Xbar C.U C.nonempty
 
 end Belyi.Anabelian

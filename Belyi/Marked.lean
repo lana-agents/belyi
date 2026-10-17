@@ -102,15 +102,16 @@ carrying `S` into the fibre over the marked set: `∀ s ∈ S, f s ∈ {0, 1, �
 The map is `f₀ ≫ polynomialSelfMap ĝ` for a B1 cover `f₀` and the reduction polynomial
 `ĝ = g.map (algebraMap ℚ k)`, where `g` is produced by B6∘B7 fed with *both* the affine branch
 coordinates of `f₀` and the affine coordinates of the images `f₀ '' S` of the marked points. -/
-theorem exists_isBelyiMap_marked_of_isCurveOver
+theorem exists_isBelyiMap_marked_isOver_of_isCurveOver
     (k : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
     (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of k))] [IsCurveOver k X]
     (S : Set X) (hSfin : S.Finite) (hScl : ∀ s ∈ S, IsClosed ({s} : Set X)) :
-    ∃ f : X ⟶ P1 k, IsBelyiMap k f ∧ ∀ s ∈ S, f.base s ∈ Belyi.markedPoints k := by
+    ∃ f : X ⟶ P1 k, IsBelyiMap k f ∧ (∀ s ∈ S, f.base s ∈ Belyi.markedPoints k) ∧
+      f ≫ (P1 k ↘ Spec (CommRingCat.of k)) = X ↘ Spec (CommRingCat.of k) := by
   classical
   -- B1: a finite surjective cover `f₀ : X ⟶ ℙ¹_k`.
   haveI : IsIntegral X := IsCurveOver.isIntegral k X
-  obtain ⟨f₀, hf₀fin, hf₀surj, -⟩ := exists_isFinite_surjective_hom_to_P1 k X
+  obtain ⟨f₀, hf₀fin, hf₀surj, hf₀over⟩ := exists_isFinite_surjective_hom_to_P1 k X
   haveI : IsFinite f₀ := hf₀fin
   haveI : IsDominant f₀ := ⟨hf₀surj.denseRange⟩
   haveI : IsNoetherian (P1 k) := isNoetherian_of_over (P1 k) (Spec (CommRingCat.of k))
@@ -144,7 +145,7 @@ theorem exists_isBelyiMap_marked_of_isCurveOver
     intro a ha
     rw [Polynomial.aeval_map_algebraMap]
     exact hgS a ha
-  refine ⟨f₀ ≫ P1.polynomialSelfMap k (g.map (algebraMap ℚ k)) hd, ?_, ?_⟩
+  refine ⟨f₀ ≫ P1.polynomialSelfMap k (g.map (algebraMap ℚ k)) hd, ?_, ?_, ?_⟩
   · -- B4/B5: the composite is a Belyi map.
     refine P1.isBelyiMap_comp_polynomialSelfMap k (g.map (algebraMap ℚ k)) hd f₀ ?_ ?_
     · refine P1.polynomialSelfMap_image_branch_subset_markedPoints k f₀ hdim
@@ -163,5 +164,18 @@ theorem exists_isBelyiMap_marked_of_isCurveOver
     show (f₀ ≫ P1.polynomialSelfMap k (g.map (algebraMap ℚ k)) hd) s ∈ Belyi.markedPoints k
     rw [Scheme.Hom.comp_apply]
     exact himg ⟨f₀.base s, ⟨s, hs, rfl⟩, rfl⟩
+  · -- Both factors are morphisms over `Spec k`.
+    rw [Category.assoc, P1.structMap_eq, P1.polynomialSelfMap_structMap, ← P1.structMap_eq]
+    exact (Scheme.Hom.isOver_iff (S := Spec (CommRingCat.of k))).mp hf₀over
+
+/-- **Marked forward direction of Belyi's theorem (B13)**, without the over-`k` clause of
+`Belyi.exists_isBelyiMap_marked_isOver_of_isCurveOver`. -/
+theorem exists_isBelyiMap_marked_of_isCurveOver
+    (k : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
+    (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of k))] [IsCurveOver k X]
+    (S : Set X) (hSfin : S.Finite) (hScl : ∀ s ∈ S, IsClosed ({s} : Set X)) :
+    ∃ f : X ⟶ P1 k, IsBelyiMap k f ∧ ∀ s ∈ S, f.base s ∈ Belyi.markedPoints k :=
+  let ⟨f, hf, hS, _⟩ := exists_isBelyiMap_marked_isOver_of_isCurveOver k X S hSfin hScl
+  ⟨f, hf, hS⟩
 
 end Belyi

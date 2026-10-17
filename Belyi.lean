@@ -6,6 +6,7 @@ Authors: LANA Project
 import Belyi.AffineSmoothLocus
 import Belyi.Anabelian.BelyiChain
 import Belyi.Anabelian.BelyiInput
+import Belyi.Anabelian.BelyiInputNumberField
 import Belyi.Anabelian.Chain
 import Belyi.Anabelian.ChainTransport
 import Belyi.Anabelian.LocAn
