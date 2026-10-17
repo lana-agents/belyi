@@ -25,6 +25,7 @@ import Belyi.Converse.NormalizationOpen
 import Belyi.Converse.PathConnected
 import Belyi.Converse.Pi1Invariance
 import Belyi.Converse.Pi1InvarianceCharts
+import Belyi.Converse.Pi1InvarianceCurve
 import Belyi.Converse.Points
 import Belyi.Converse.PuncturedLine
 import Belyi.Converse.PuncturedLineBelyi
