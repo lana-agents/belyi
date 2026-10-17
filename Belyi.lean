@@ -20,6 +20,7 @@ import Belyi.Converse.IntegralClosureBaseChange
 import Belyi.Converse.IsoDescent
 import Belyi.Converse.Main
 import Belyi.Converse.Normalization
+import Belyi.Converse.NormalizationOpen
 import Belyi.Converse.NormalizationBaseChange
 import Belyi.Converse.PathConnected
 import Belyi.Converse.Pi1Invariance
