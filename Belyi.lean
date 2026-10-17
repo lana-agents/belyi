@@ -4,6 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: LANA Project
 -/
 import Belyi.AffineSmoothLocus
+import Belyi.Anabelian.Chain
+import Belyi.Anabelian.ChainTransport
+import Belyi.Anabelian.LocAn
 import Belyi.Basic
 import Belyi.BelyiCoverEtale
 import Belyi.BelyiCoverRestrict
