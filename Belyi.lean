@@ -9,6 +9,8 @@ import Belyi.Anabelian.BelyiInput
 import Belyi.Anabelian.BelyiInputNumberField
 import Belyi.Anabelian.Chain
 import Belyi.Anabelian.ChainTransport
+import Belyi.Anabelian.Comparison
+import Belyi.Anabelian.EllipticChain
 import Belyi.Anabelian.LocAn
 import Belyi.Anabelian.OutSemidirect
 import Belyi.Anabelian.SpreadOut
