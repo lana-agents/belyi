@@ -10,7 +10,7 @@ import Pi1.FundamentalGroup.BaseChangeInjective
 /-!
 # Invariance of `π₁ᵉᵗ` under extension of algebraically closed fields (affine case)
 
-Let `k` be an algebraically closed field of characteristic zero which is algebraic over `ℚ`
+Let `k` be an algebraically closed field of characteristic zero which is countable
 (e.g. `ℚ̄`), `Ω ⊇ k` an algebraically closed field (e.g. `ℂ`) and `X = Spec R` a connected affine
 scheme of finite type over `k`. Then the projection `X_Ω = Spec (Ω ⊗[k] R) ⟶ X` induces an
 **isomorphism** `π₁ᵉᵗ(X_Ω) ≃ₜ* π₁ᵉᵗ(X)` (SGA 1 X.1.8 in characteristic `0`, affine case).
@@ -107,11 +107,11 @@ theorem exists_mono_pullback_baseChange_of_fEtDescent (hdesc : Belyi.Converse.FE
   have : Mono ℓ := @mono_comp _ _ _ _ _ _ inferInstance _ hmono
   exact (MorphismProperty.Over.forget _ _ _ ⋙ Over.forget _).mono_of_mono_map this
 
-variable [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k] [IsAlgClosed Ω]
+variable [IsAlgClosed k] [CharZero k] [Countable k] [IsAlgClosed Ω]
   [Algebra.FiniteType k R]
 
 /-- **`π₁ᵉᵗ(X_Ω) → π₁ᵉᵗ(X)` is injective** for an extension `Ω ⊇ k` of algebraically closed
-fields of characteristic zero with `k` algebraic over `ℚ`, and `X = Spec R` affine of finite type
+fields of characteristic zero with `k` countable, and `X = Spec R` affine of finite type
 over `k` with `X_Ω` connected. -/
 theorem fundamentalGroupMap_baseChange_injective_of_isAlgClosed
     [ConnectedSpace (Spec (.of (Ω ⊗[k] R)))] {L : Type u} [Field L] [IsSepClosed L]
@@ -119,10 +119,11 @@ theorem fundamentalGroupMap_baseChange_injective_of_isAlgClosed
     Function.Injective (fundamentalGroupMap (baseChangeSpec k Ω R) (rfl :
       x ≫ baseChangeSpec k Ω R = _)) := fun _ _ hab ↦
   PreGaloisCategory.fiberAutMap_injective (fiber x) (pullbackFiberIso _ rfl)
-    (fun A _ ↦ exists_mono_pullback_baseChange_of_fEtDescent (Belyi.Converse.fEtDescent k Ω) A)
+    (fun A _ ↦ exists_mono_pullback_baseChange_of_fEtDescent
+      (Belyi.Converse.fEtDescent_of_countable k Ω) A)
     hab
 
-omit [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k] [IsAlgClosed Ω]
+omit [IsAlgClosed k] [CharZero k] [Countable k] [IsAlgClosed Ω]
   [Algebra.FiniteType k R] in
 /-- `X_Ω = Spec (Ω ⊗[k] R) ⟶ X = Spec R` is the base change of `Spec Ω ⟶ Spec k`. -/
 lemma isPullback_baseChangeSpec :
@@ -133,17 +134,17 @@ lemma isPullback_baseChangeSpec :
       (Spec.map (CommRingCat.ofHom (algebraMap k Ω))) :=
   (isPullback_SpecMap_of_isPushout _ _ _ _ (CommRingCat.isPushout_tensorProduct k Ω R)).flip
 
-omit [CharZero k] [Algebra.IsAlgebraic ℚ k] [IsAlgClosed Ω] [Algebra.FiniteType k R] in
+omit [CharZero k] [Countable k] [IsAlgClosed Ω] [Algebra.FiniteType k R] in
 instance geometricallyConnected_baseChangeSpec : GeometricallyConnected (baseChangeSpec k Ω R) :=
   haveI := geometricallyConnected_Spec_of_isAlgClosed k Ω
   MorphismProperty.of_isPullback isPullback_baseChangeSpec.flip ‹_›
 
-omit [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k] [IsAlgClosed Ω]
+omit [IsAlgClosed k] [CharZero k] [Countable k] [IsAlgClosed Ω]
   [Algebra.FiniteType k R] in
 instance universallyOpen_baseChangeSpec : UniversallyOpen (baseChangeSpec k Ω R) :=
   MorphismProperty.of_isPullback isPullback_baseChangeSpec.flip inferInstance
 
-omit [CharZero k] [Algebra.IsAlgebraic ℚ k] [IsAlgClosed Ω] [Algebra.FiniteType k R] in
+omit [CharZero k] [Countable k] [IsAlgClosed Ω] [Algebra.FiniteType k R] in
 /-- For `X = Spec R` connected over an algebraically closed `k`, `X_Ω` is connected. -/
 instance connectedSpace_baseChange [ConnectedSpace (Spec (.of R))] :
     ConnectedSpace (Spec (.of (Ω ⊗[k] R))) :=
@@ -152,7 +153,7 @@ instance connectedSpace_baseChange [ConnectedSpace (Spec (.of R))] :
 
 /-- **Invariance of `π₁ᵉᵗ` under extension of algebraically closed fields** (affine case, SGA 1
 X.1.8 in characteristic `0`): for `k ⊆ Ω` algebraically closed of characteristic zero with `k`
-algebraic over `ℚ`, and `X = Spec R` connected of finite type over `k`, the projection
+countable, and `X = Spec R` connected of finite type over `k`, the projection
 `X_Ω ⟶ X` induces a bijection `π₁ᵉᵗ(X_Ω, x) → π₁ᵉᵗ(X, x)` at every geometric point `x`. -/
 theorem fundamentalGroupMap_baseChange_bijective_of_isAlgClosed [ConnectedSpace (Spec (.of R))]
     {L : Type u} [Field L] [IsSepClosed L] (x : Spec (.of L) ⟶ Spec (.of (Ω ⊗[k] R))) :

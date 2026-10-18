@@ -176,7 +176,7 @@ theorem fundamentalGroupMap_bijective_of_charts (hUU' : U ⊔ U' = ⊤) [Connect
 section Affine
 
 variable {k Ω : Type u} [Field k] [Field Ω] [Algebra k Ω] [IsAlgClosed k] [CharZero k]
-  [Algebra.IsAlgebraic ℚ k] [IsAlgClosed Ω]
+  [Countable k] [IsAlgClosed Ω]
 
 /-- **INV-1 for base change squares.** If `g : Y' ⟶ Y` is the base change of
 `Spec Ω ⟶ Spec k` along `q : Y ⟶ Spec k`, where `Y ≅ Spec R` with `R` connected of finite type

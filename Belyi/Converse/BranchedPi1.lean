@@ -319,6 +319,7 @@ theorem exists_etaleFundamentalGroup_equiv_completion_freeGroup {c : ℂ} (hc0 :
   haveI : ConnectedSpace (Spec (CommRingCat.of B)) := inferInstance
   haveI : ConnectedSpace (Spec (CommRingCat.of (ULift.{u} ℂ ⊗[k] B))) :=
     connectedSpace_baseChangeSpec k B
+  haveI := Belyi.Converse.countable_of_isAlgebraic_rat k
   exact (FiniteEtale.fundamentalGroupBaseChangeEquiv (Ω := ULift.{u} ℂ)
     (geometricPoint (baseChangeSpec k B) x)).symm.trans
       ((etaleFundamentalGroupEquivCompletion x).trans

@@ -12,7 +12,7 @@ import Belyi.P1.BaseChangeIso
 /-!
 # Invariance of `π₁ᵉᵗ` of a curve under extension of algebraically closed fields (INV-2)
 
-Let `k` be algebraically closed of characteristic `0` and algebraic over `ℚ`, let `Ω ⊇ k` be
+Let `k` be algebraically closed of characteristic `0` and countable (e.g. `ℚ̄`), let `Ω ⊇ k` be
 algebraically closed, and let `X` be a curve over `k` (`Belyi.IsCurveOver`: smooth, proper,
 geometrically integral of relative dimension one). Write `X_Ω = X ×_k Ω` and `g : X_Ω ⟶ X` for
 the projection. Then `π₁ᵉᵗ(X_Ω) → π₁ᵉᵗ(X)` is bijective
@@ -123,7 +123,7 @@ namespace FiniteEtale
 open Belyi
 
 variable {k Ω : Type u} [Field k] [Field Ω] [Algebra k Ω] [IsAlgClosed k] [CharZero k]
-  [Algebra.IsAlgebraic ℚ k] [IsAlgClosed Ω]
+  [Countable k] [IsAlgClosed Ω]
 
 /-- Change of the base point along an equality of geometric points. -/
 lemma fundamentalGroupMap_bijective_of_eq {X Y : Scheme.{u}} {L : Type u} [Field L]
@@ -177,7 +177,7 @@ theorem fundamentalGroupMap_resLE_bijective {X X' : Scheme.{u}} (g : X' ⟶ X)
   exact fundamentalGroupMap_bijective_of_isPullback_of_iso _ _ _ H' _ W.toScheme.isoSpec x
 
 /-- **INV-2, general form.** Let `X` be a curve over `k` (algebraically closed, characteristic
-`0`, algebraic over `ℚ`) and `g : X' ⟶ X` its base change along `Spec Ω ⟶ Spec k`
+`0`, countable) and `g : X' ⟶ X` its base change along `Spec Ω ⟶ Spec k`
 (`Ω ⊇ k` algebraically closed; `X'` a curve over `Ω`), let `U, U'` be affine opens covering
 `X`, and `ζ` a geometric point of `X'` over `U ∩ U'`. Then `π₁ᵉᵗ(X', ζ) → π₁ᵉᵗ(X, ζ)` is
 bijective. -/
@@ -241,8 +241,8 @@ theorem fundamentalGroupMap_bijective_of_isPullback_curve {X X' : Scheme.{u}} (g
 
 variable (k Ω) (X : Scheme.{u}) [X.Over (Spec (CommRingCat.of k))] [IsCurveOver k X]
 
-/-- **INV-2.** For a curve `X` over `k` (algebraically closed, characteristic `0`, algebraic
-over `ℚ`), `Ω ⊇ k` algebraically closed, affine opens `U, U'` covering `X` and a geometric point
+/-- **INV-2.** For a curve `X` over `k` (algebraically closed, characteristic `0`,
+countable), `Ω ⊇ k` algebraically closed, affine opens `U, U'` covering `X` and a geometric point
 `ζ` of `X_Ω = X ×_k Ω` over `U ∩ U'`, the projection `X_Ω ⟶ X` induces a bijection
 `π₁ᵉᵗ(X_Ω, ζ) → π₁ᵉᵗ(X, ζ)`. -/
 theorem fundamentalGroupMap_curve_baseChange_bijective (U U' : X.Opens) (hU : IsAffineOpen U)

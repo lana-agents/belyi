@@ -12,9 +12,9 @@ import Belyi.Converse.Spread
 # Descent of finite étale covers along `k ⊆ K` (★)
 
 The core theorem (★) of `references/converse-rie-design.md`: for `k` algebraically closed of
-characteristic zero and algebraic over `ℚ`, `K ⊇ k` algebraically closed, `R` a finitely generated
-`k`-algebra and `B` a finite étale `K ⊗[k] R`-algebra, there is a finite étale `R`-algebra `B₀`
-with `K ⊗[k] B₀ ≅ B` as `K ⊗[k] R`-algebras.
+characteristic zero and countable (e.g. algebraic over `ℚ`), `K ⊇ k` algebraically closed, `R` a
+finitely generated `k`-algebra and `B` a finite étale `K ⊗[k] R`-algebra, there is a finite étale
+`R`-algebra `B₀` with `K ⊗[k] B₀ ≅ B` as `K ⊗[k] R`-algebras.
 
 The proof is assembled from the packages of the converse, assuming the rigidity statement over
 `ℂ` (package S3c), which is recorded here as the proposition `Belyi.Converse.RigidityOverC`:
@@ -111,11 +111,11 @@ theorem nonempty_algEquiv_tensor_of_rigidity
   exact ⟨eK.symm⟩
 
 /-- **Descent of finite étale covers (★)**, assuming rigidity over `ℂ` (package S3c): let `k` be
-algebraically closed of characteristic zero and algebraic over `ℚ`, `K ⊇ k` algebraically closed,
+algebraically closed of characteristic zero and countable, `K ⊇ k` algebraically closed,
 `R` a finitely generated `k`-algebra and `B` a finite étale `K ⊗[k] R`-algebra. Then there is a
 finite étale `R`-algebra `B₀` with `K ⊗[k] B₀ ≅ B` as `K ⊗[k] R`-algebras. -/
 theorem exists_finiteEtale_model_of_rigidity
-    (k K R : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
+    (k K R : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Countable k]
     [Field K] [IsAlgClosed K] [Algebra k K]
     [CommRing R] [Algebra k R] [Algebra.FiniteType k R]
     (hrig : ∀ [Algebra k (ULift.{u} ℂ)], RigidityOverC k)
@@ -130,10 +130,9 @@ theorem exists_finiteEtale_model_of_rigidity
   obtain ⟨A, hAft, hAsm, BA, _, _, _, _, g, hg⟩ := exists_spread k K R B
   -- (S4) a `k`-point of `A`, and `k → ℂ`
   obtain ⟨s⟩ := nonempty_algHom_of_isAlgClosed k A
-  obtain ⟨σ⟩ := nonempty_ringHom_complex k
+  obtain ⟨σ⟩ := nonempty_ringHom_complex_of_countable k
   letI : Algebra k (ULift.{u} ℂ) :=
     ((ULift.ringEquiv.symm : ℂ ≃+* ULift.{u} ℂ).toRingHom.comp σ).toAlgebra
-  haveI : Countable k := countable_of_isAlgebraic_rat k
   -- the fibre `B₀` of `B_A` at `s`
   letI := (evalTensor R s).toRingHom.toAlgebra
   letI := tensorRightAlgebra k R K (R ⊗[A ⊗[k] R] BA)
@@ -149,7 +148,7 @@ theorem exists_finiteEtale_model_of_rigidity
 /-- **Descent of finite étale covers (★)**, assuming rigidity over `ℂ` (package S3c), in the form
 `Belyi.Converse.FEtDescent k K`. -/
 theorem fEtDescent_of_rigidity
-    (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Algebra.IsAlgebraic ℚ k]
+    (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k] [Countable k]
     [Field K] [IsAlgClosed K] [Algebra k K]
     (hrig : ∀ [Algebra k (ULift.{u} ℂ)], RigidityOverC k) : FEtDescent k K :=
   fun R _ _ _ B _ _ _ _ ↦ exists_finiteEtale_model_of_rigidity k K R hrig B

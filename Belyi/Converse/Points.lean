@@ -124,4 +124,27 @@ theorem exists_injective_algHom (k Ω A : Type u) [Field k] [Countable k]
   exact @Algebra.IsAlgebraic.injective_tower_top R A _ Ω _ _ _ _ _ _ _
     (IsScalarTower.of_algebraMap_eq fun x ↦ (ψ.commutes x).symm) hφ
 
+/-- A countable field of characteristic zero embeds into `ℂ`: a (countable) transcendence basis of
+`k` over `ℚ` is sent injectively into an (infinite) transcendence basis of `ℂ`, and the algebraic
+extension `k` of the resulting polynomial ring lifts into the algebraically closed field `ℂ`. -/
+theorem nonempty_ringHom_complex_of_countable (k : Type u) [Field k] [CharZero k]
+    [Countable k] : Nonempty (k →+* ℂ) := by
+  obtain ⟨s, hs⟩ := exists_isTranscendenceBasis ℚ k
+  obtain ⟨t, ht⟩ := exists_isTranscendenceBasis ℚ ℂ
+  have htinf : Infinite t := infinite_of_isTranscendenceBasis ht
+  obtain ⟨emb⟩ : Nonempty (s ↪ t) := by
+    rw [← Cardinal.lift_mk_le']
+    refine (Cardinal.lift_le_aleph0.2 Cardinal.mk_le_aleph0).trans ?_
+    exact Cardinal.aleph0_le_lift.2 (Cardinal.infinite_iff.mp htinf)
+  let y : s → ℂ := fun i ↦ (emb i : ℂ)
+  have hy : AlgebraicIndependent ℚ y := ht.1.comp emb emb.injective
+  let R := Algebra.adjoin ℚ (Set.range ((↑) : s → k))
+  let φ : R →ₐ[ℚ] ℂ := (MvPolynomial.aeval y).comp hs.1.aevalEquiv.symm.toAlgHom
+  have hφ : Function.Injective φ :=
+    (algebraicIndependent_iff_injective_aeval.mp hy).comp hs.1.aevalEquiv.symm.injective
+  letI : Algebra R ℂ := φ.toAlgebra
+  haveI : Algebra.IsAlgebraic R k := hs.isAlgebraic
+  haveI : Module.IsTorsionFree R ℂ := Module.isTorsionFree_iff_algebraMap_injective.mpr hφ
+  exact ⟨(IsAlgClosed.lift : k →ₐ[R] ℂ).toRingHom⟩
+
 end Belyi.Converse

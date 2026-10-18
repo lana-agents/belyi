@@ -25,7 +25,8 @@ This assembles the proof laid out in `references/converse-rie-design.md`:
 
 ## Main results
 
-* `Belyi.Converse.fEtDescent`: statement (★), unconditionally.
+* `Belyi.Converse.fEtDescent`: statement (★), unconditionally (`fEtDescent_of_countable`: for any
+  countable algebraically closed `k` of characteristic zero).
 * `Belyi.definableOver_of_exists_isBelyiMap` (**B12**): the converse of Belyi's theorem.
 -/
 
@@ -37,12 +38,21 @@ namespace Belyi
 
 namespace Converse
 
+/-- **Descent of finite étale covers (★)**, countable form: for algebraically closed fields
+`k ⊆ K` of characteristic zero with `k` countable, every finite étale cover of
+`Spec (K ⊗[k] R)`, `R` a finitely generated `k`-algebra, is the base change of a finite étale cover
+of `Spec R`. -/
+theorem fEtDescent_of_countable (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
+    [Countable k] [Field K] [IsAlgClosed K] [Algebra k K] : FEtDescent k K :=
+  fEtDescent_of_rigidity k K fun {_} ↦ rigidityOverC k
+
 /-- **Descent of finite étale covers (★).** For algebraically closed fields `k ⊆ K` of
 characteristic zero with `k` algebraic over `ℚ`, every finite étale cover of `Spec (K ⊗[k] R)`,
 `R` a finitely generated `k`-algebra, is the base change of a finite étale cover of `Spec R`. -/
 theorem fEtDescent (k K : Type u) [Field k] [IsAlgClosed k] [CharZero k]
     [Algebra.IsAlgebraic ℚ k] [Field K] [IsAlgClosed K] [Algebra k K] : FEtDescent k K :=
-  fEtDescent_of_rigidity k K fun {_} ↦ rigidityOverC k
+  haveI := countable_of_isAlgebraic_rat k
+  fEtDescent_of_countable k K
 
 end Converse
 
