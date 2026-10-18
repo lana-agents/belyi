@@ -16,8 +16,9 @@ Let `k` be an algebraically closed field with `k → ℂ`, `B` a finitely genera
 is a domain, smooth of relative dimension one, and `t ∈ B` such that `k[t] → B` is finite and
 étale after inverting `t (t - 1)` (for instance `B = Γ(X ∖ f⁻¹(∞))`, `t = f` for a Belyi map
 `f : X → ℙ¹`). This file moves these hypotheses along `k → ℂ` to `A = ℂ ⊗[k] B` and `z = 1 ⊗ t`
-(`Belyi.Converse.BranchedData.finite_baseChange`, `…etale_baseChange`,
-`…smoothOfRelativeDimension_baseChange`): the squares
+(`Belyi.Converse.FiniteCoord.finite_baseChange`, `…etale_baseChange_of`,
+`…smoothOfRelativeDimension_baseChange`, `Belyi.Converse.BranchedData.etale_baseChange`): the
+squares
 
 ```
   k[X] → B          k[X] → B[(t(t-1))⁻¹]
@@ -33,9 +34,11 @@ numbers of maximal ideals of `ℂ ⊗ B` containing `z - c` (any `c ∉ {0, 1}`)
 
 More generally, for any finite `S ⊆ k` such that `k[X] → B[P_S(t)⁻¹]` is étale,
 `P_S = ∏_{s ∈ S} (X - s)` (`Belyi.Converse.branchPolyOf`), `π₁` is free of rank
-`d (|S| - 1) + 1 - ∑_{s ∈ S} c_s` (`…exists_fundamentalGroup_mulEquiv_freeGroup_of_finset`), and for
+`d (|S| - 1) + 1 - ∑_{s ∈ S} c_s`
+(`Belyi.Converse.FiniteCoord.exists_fundamentalGroup_mulEquiv_freeGroup_of_finset`), and for
 `k` countable `π₁ᵉᵗ(Spec B)` is its profinite completion
-(`…exists_etaleFundamentalGroup_equiv_completion_freeGroup_of_finset`).
+(`…exists_etaleFundamentalGroup_equiv_completion_freeGroup_of_finset`; these only need the
+finite coordinate `Belyi.Converse.FiniteCoord`).
 -/
 
 open CategoryTheory AlgebraicGeometry Topology
@@ -51,20 +54,24 @@ open ComplexAnalytic
 noncomputable abbrev branchPolyZeroOne (R : Type*) [CommRing R] : MvPolynomial (Fin 1) R :=
   MvPolynomial.X 0 * (MvPolynomial.X 0 - 1)
 
-/-- **The data of a function on an affine curve over `k`, finite and étale over `𝔸¹ ∖ {0, 1}`.** -/
-structure BranchedData (k : Type u) [Field k] (B : Type u) [CommRing B] [Algebra k B] where
+/-- **A finite coordinate** on an affine `k`-scheme `Spec B`: `t ∈ B` with `k[t] → B` finite. -/
+structure FiniteCoord (k : Type u) [Field k] (B : Type u) [CommRing B] [Algebra k B] where
   /-- The function. -/
   t : B
   /-- `k[t] → B` is finite. -/
   finite : (MvPolynomial.aeval (R := k) fun _ : Fin 1 ↦ t).Finite
+
+/-- **The data of a function on an affine curve over `k`, finite and étale over `𝔸¹ ∖ {0, 1}`.** -/
+structure BranchedData (k : Type u) [Field k] (B : Type u) [CommRing B] [Algebra k B]
+    extends FiniteCoord k B where
   /-- `k[t] → B[(t(t-1))⁻¹]` is étale. -/
   etale : ((algebraMap B (Localization.Away
     (MvPolynomial.aeval (R := k) (fun _ : Fin 1 ↦ t) (branchPolyZeroOne k)))).comp
       (MvPolynomial.aeval (R := k) fun _ : Fin 1 ↦ t).toRingHom).Etale
 
-namespace BranchedData
+namespace FiniteCoord
 
-variable {k : Type u} [Field k] {B : Type u} [CommRing B] [Algebra k B] (D : BranchedData k B)
+variable {k : Type u} [Field k] {B : Type u} [CommRing B] [Algebra k B] (D : FiniteCoord k B)
   {Ω : Type u} [CommRing Ω] [Algebra k Ω]
 
 attribute [local instance] Algebra.TensorProduct.rightAlgebra MvPolynomial.algebraMvPolynomial
@@ -246,16 +253,6 @@ theorem etale_baseChange_of (P : MvPolynomial (Fin 1) k)
   rw [IsScalarTower.algebraMap_eq (MvPolynomial (Fin 1) Ω) T Th] at hTh
   exact hTh
 
-/-- **`Ω[X] → (Ω ⊗ B)[(z(z-1))⁻¹]`, `X ↦ z = 1 ⊗ t`, is étale** (`etale_baseChange_of` for
-`P = X (X - 1)`). -/
-theorem etale_baseChange :
-    ((algebraMap (Ω ⊗[k] B) (Localization.Away (MvPolynomial.aeval (R := Ω)
-      (fun _ : Fin 1 ↦ (1 ⊗ₜ D.t : Ω ⊗[k] B)) (branchPolyZeroOne Ω)))).comp
-        (MvPolynomial.aeval (R := Ω) fun _ : Fin 1 ↦ (1 ⊗ₜ D.t : Ω ⊗[k] B)).toRingHom).Etale := by
-  have h := D.etale_baseChange_of (Ω := Ω) _ D.etale
-  rwa [show MvPolynomial.map (algebraMap k Ω) (branchPolyZeroOne k) = branchPolyZeroOne Ω by
-    simp [branchPolyZeroOne]] at h
-
 omit [Algebra k Ω] in
 /-- **Smoothness of relative dimension one is preserved by `Spec (Ω ⊗[k] -)`.** -/
 theorem smoothOfRelativeDimension_baseChange {n : ℕ} [Algebra k Ω]
@@ -265,6 +262,25 @@ theorem smoothOfRelativeDimension_baseChange {n : ℕ} [Algebra k Ω]
   have h := isPullback_SpecMap_of_isPushout _ _ _ _ (CommRingCat.isPushout_tensorProduct k Ω B)
   exact (smoothOfRelativeDimension_isStableUnderBaseChange (n := n)).of_isPullback
     h.flip inferInstance
+
+end FiniteCoord
+
+namespace BranchedData
+
+variable {k : Type u} [Field k] {B : Type u} [CommRing B] [Algebra k B] (D : BranchedData k B)
+  {Ω : Type u} [CommRing Ω] [Algebra k Ω]
+
+attribute [local instance] Algebra.TensorProduct.rightAlgebra
+
+/-- **`Ω[X] → (Ω ⊗ B)[(z(z-1))⁻¹]`, `X ↦ z = 1 ⊗ t`, is étale** (`etale_baseChange_of` for
+`P = X (X - 1)`). -/
+theorem etale_baseChange :
+    ((algebraMap (Ω ⊗[k] B) (Localization.Away (MvPolynomial.aeval (R := Ω)
+      (fun _ : Fin 1 ↦ (1 ⊗ₜ D.t : Ω ⊗[k] B)) (branchPolyZeroOne Ω)))).comp
+        (MvPolynomial.aeval (R := Ω) fun _ : Fin 1 ↦ (1 ⊗ₜ D.t : Ω ⊗[k] B)).toRingHom).Etale := by
+  have h := D.etale_baseChange_of (Ω := Ω) _ D.etale
+  rwa [show MvPolynomial.map (algebraMap k Ω) (branchPolyZeroOne k) = branchPolyZeroOne Ω by
+    simp [branchPolyZeroOne]] at h
 
 end BranchedData
 
@@ -327,7 +343,8 @@ theorem exists_fundamentalGroup_mulEquiv_freeGroup {c : ℂ} (hc0 : c ≠ 0) (hc
   haveI : IsDomain (B ⊗[k] ULift.{u} ℂ) := isDomain_tensorProduct_of_isAlgClosed
   haveI : IsDomain (ULift.{u} ℂ ⊗[k] B) :=
     (Algebra.TensorProduct.comm k (ULift.{u} ℂ) B).toMulEquiv.isDomain
-  haveI := smoothOfRelativeDimension_baseChange (k := k) (Ω := ULift.{u} ℂ) (B := B) (n := 1)
+  haveI := FiniteCoord.smoothOfRelativeDimension_baseChange (k := k) (Ω := ULift.{u} ℂ) (B := B)
+    (n := 1)
   have het := D.etale_baseChange (Ω := ULift.{u} ℂ)
   rw [← branchPoly_zero_one] at het
   have hc : c ∉ ({0, 1} : Finset ℂ) := by simp [hc0, hc1]
@@ -338,11 +355,20 @@ theorem exists_fundamentalGroup_mulEquiv_freeGroup {c : ℂ} (hc0 : c ≠ 0) (hc
   rw [Finset.sum_pair zero_ne_one, Finset.card_pair zero_ne_one] at hcard
   linarith
 
+end BranchedData
+
+namespace FiniteCoord
+
+variable {k : Type u} [Field k] [IsAlgClosed k] [Algebra k (ULift.{u} ℂ)] {B : Type u}
+  [CommRing B] [IsDomain B] [Algebra k B] [Algebra.FiniteType k B]
+  [SmoothOfRelativeDimension 1 (Spec.map (CommRingCat.ofHom (algebraMap k B)))]
+  (D : FiniteCoord k B)
+
 /-- **General branch locus.** If `k[X] → B[P_S(t)⁻¹]` is étale for `P_S = ∏_{s ∈ S} (X - s)`
 (`branchPolyOf S`, any finite `S ⊆ k`), then `π₁` of the analytification of `ℂ ⊗[k] B` is free of
 rank `d (|S| - 1) + 1 - ∑_{s ∈ S} c_s`, where `d`, `c_s` are the numbers of maximal ideals of
 `ℂ ⊗[k] B` containing `z - c` (any `c ∉ σ(S)`), `z - σ(s)`, for `z = 1 ⊗ t` and `σ : k → ℂ`;
-at every base point `x`. (Only `D.t` and `D.finite` are used, not `D.etale`.) -/
+at every base point `x`. -/
 theorem exists_fundamentalGroup_mulEquiv_freeGroup_of_finset (S : Finset k)
     (hS : ((algebraMap B (Localization.Away
       (MvPolynomial.aeval (R := k) (fun _ : Fin 1 ↦ D.t) (branchPolyOf S)))).comp
@@ -358,7 +384,8 @@ theorem exists_fundamentalGroup_mulEquiv_freeGroup_of_finset (S : Finset k)
   haveI : IsDomain (B ⊗[k] ULift.{u} ℂ) := isDomain_tensorProduct_of_isAlgClosed
   haveI : IsDomain (ULift.{u} ℂ ⊗[k] B) :=
     (Algebra.TensorProduct.comm k (ULift.{u} ℂ) B).toMulEquiv.isDomain
-  haveI := smoothOfRelativeDimension_baseChange (k := k) (Ω := ULift.{u} ℂ) (B := B) (n := 1)
+  haveI := FiniteCoord.smoothOfRelativeDimension_baseChange (k := k) (Ω := ULift.{u} ℂ) (B := B)
+    (n := 1)
   have hinj : Function.Injective fun s : k ↦ (algebraMap k (ULift.{u} ℂ) s).down :=
     ULift.down_injective.comp (algebraMap k (ULift.{u} ℂ)).injective
   have het := D.etale_baseChange_of (Ω := ULift.{u} ℂ) _ hS
@@ -404,6 +431,15 @@ theorem exists_etaleFundamentalGroup_equiv_completion_freeGroup_of_finset (S : F
           (ProfiniteGrp.profiniteCompletion.mapIso (MulEquiv.toGrpIso Φ))))
 
 end Countable
+
+end FiniteCoord
+
+namespace BranchedData
+
+variable {k : Type u} [Field k] [IsAlgClosed k] [Algebra k (ULift.{u} ℂ)] {B : Type u}
+  [CommRing B] [IsDomain B] [Algebra k B] [Algebra.FiniteType k B]
+  [SmoothOfRelativeDimension 1 (Spec.map (CommRingCat.ofHom (algebraMap k B)))]
+  (D : BranchedData k B)
 
 variable [CharZero k] [Algebra.IsAlgebraic ℚ k]
 
