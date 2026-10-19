@@ -108,19 +108,27 @@ end P1Tower
 variable (F Ω : Type u) [Field F] [Field Ω] [Algebra F Ω] [Algebra.IsAlgebraic F Ω]
   [IsAlgClosed Ω] [CharZero F] [Algebra.IsAlgebraic ℚ F]
 
-/-- **[AbsTopII] Example 3.6 (i) over a finite extension of the field of definition.** Let `X₀`
-be a curve over a field `F` algebraic over `ℚ` (e.g. a number field), `U₀ ⊆ X₀` a nonempty open
-subscheme and `Ω` an algebraic closure of `F`. Then for some finite subextension `K` of `Ω / F`
-there is a finite morphism `f : X_K ⟶ ℙ¹_K` over `K` (`X_K = Spec K ×_F X₀`) such that
-`W = f⁻¹(ℙ¹_K ∖ {0, 1, ∞})` is a nonempty open subscheme of `U_K` and
-`f|_W : W ⟶ ℙ¹_K ∖ {0, 1, ∞}` is finite étale. -/
-theorem exists_belyi_open_le_finSub (X₀ : Scheme.{u}) [X₀.Over (Spec (.of F))]
-    [IsCurveOver F X₀] (U₀ : X₀.Opens) (hU₀ : (U₀ : Set X₀).Nonempty) :
-    ∃ (K : FinSub F Ω) (f : pullback (specAlgebraMap F K.1) (X₀ ↘ Spec (.of F)) ⟶ P1 K.1),
+/-- **[AbsTopII] Example 3.6 (i) over a finite extension of the field of definition, with the
+field as large as the cusps require.** Let `X₀` be a curve over a field `F` algebraic over `ℚ`,
+`U₀ ⊆ X₀` a nonempty open subscheme, `Ω` an algebraic closure of `F` and `P` any rule assigning
+a finite subextension of `Ω / F` to a subset of `X₀`. Then there are a finite set `S₀ ⊆ X₀`, a
+finite subextension `K ⊇ P S₀` and a finite morphism `f : X_K ⟶ ℙ¹_K` over `K` such that
+`W = f⁻¹(ℙ¹_K ∖ {0, 1, ∞})` is a nonempty open subscheme of `U_K`, `f|_W` is finite étale, and
+every point of `X_K` outside `W` lies over `S₀`. (With `P S₀` a field over which the points over
+`S₀` become rational this is [AbsTopII] Example 3.6 (i), l.4634–4635: "by replacing `k′` by some
+finite extension of `k′`, … the cusps of `W` are all defined over `k′`".) -/
+theorem exists_belyi_open_le_finSub_ge (X₀ : Scheme.{u}) [X₀.Over (Spec (.of F))]
+    [IsCurveOver F X₀] (U₀ : X₀.Opens) (hU₀ : (U₀ : Set X₀).Nonempty)
+    (P : Set X₀ → FinSub F Ω) :
+    ∃ (S₀ : Set X₀) (K : FinSub F Ω)
+      (f : pullback (specAlgebraMap F K.1) (X₀ ↘ Spec (.of F)) ⟶ P1 K.1),
+      S₀.Finite ∧ P S₀ ≤ K ∧
       f ≫ (P1 K.1 ↘ Spec (.of K.1)) = pullback.fst _ _ ∧ IsFinite f ∧
       f ⁻¹ᵁ puncturedLine K.1 ≤ pullback.snd (specAlgebraMap F K.1) (X₀ ↘ Spec (.of F)) ⁻¹ᵁ U₀ ∧
       (SetLike.coe (f ⁻¹ᵁ puncturedLine K.1)).Nonempty ∧
-      IsFinite (f ∣_ puncturedLine K.1) ∧ Etale (f ∣_ puncturedLine K.1) := by
+      IsFinite (f ∣_ puncturedLine K.1) ∧ Etale (f ∣_ puncturedLine K.1) ∧
+      ∀ x, x ∉ f ⁻¹ᵁ puncturedLine K.1 →
+        pullback.snd (specAlgebraMap F K.1) (X₀ ↘ Spec (.of F)) x ∈ S₀ := by
   haveI : CharZero Ω := charZero_of_injective_algebraMap (algebraMap F Ω).injective
   haveI : Algebra.IsAlgebraic ℚ Ω := Algebra.IsAlgebraic.trans ℚ F Ω
   set p₀ := X₀ ↘ Spec (.of F) with hp₀
@@ -139,13 +147,18 @@ theorem exists_belyi_open_le_finSub (X₀ : Scheme.{u}) [X₀.Over (Spec (.of F)
   obtain ⟨fΩ, hBel, hover, hWU, hWne, -, hWet⟩ :=
     exists_belyi_open_le Ω (pullback (specAlgebraMap F Ω) p₀) _ hUΩ
   haveI := hBel.isFinite
+  -- The image `S₀ ⊆ X₀` of the complement of `W_Ω`.
+  set S₀ : Set X₀ := ⇑(pullback.snd (specAlgebraMap F Ω) p₀) ''
+    (SetLike.coe (fΩ ⁻¹ᵁ puncturedLine Ω))ᶜ with hS₀
+  have hS₀fin : S₀.Finite :=
+    (finite_compl_of_isCurveOver (k := Ω) _ (fΩ ⁻¹ᵁ puncturedLine Ω) hWne).image _
   -- Spread out `X_Ω ⟶ ℙ¹_Ω ⟶ ℙ¹_F` to a finite subextension `K`.
   have hφ : (fΩ ≫ P1.mapOfAlgebra F Ω) ≫ (P1 F ↘ Spec (.of F)) =
       pullback.snd (Spec.map (CommRingCat.ofHom (algebraMap F Ω))) p₀ ≫ p₀ := by
     rw [Category.assoc, P1.mapOfAlgebra_comp_structMap, ← Category.assoc, hover]
     exact pullback.condition
-  obtain ⟨K', ψ, hψ, hψover⟩ := exists_baseChange_model (Ω := Ω) p₀
-    (P1 F ↘ Spec (.of F)) (fΩ ≫ P1.mapOfAlgebra F Ω) hφ
+  obtain ⟨K', ψ, hK₀, hψ, hψover⟩ := exists_baseChange_model_ge (Ω := Ω) p₀
+    (P1 F ↘ Spec (.of F)) (fΩ ≫ P1.mapOfAlgebra F Ω) hφ (P S₀)
   set K := K'.unop with hK
   let πX : pullback (specAlgebraMap F Ω) p₀ ⟶ pullback (specAlgebraMap F K.1) p₀ :=
     (baseChangeCone (Ω := Ω) p₀).π.app K'
@@ -203,7 +216,8 @@ theorem exists_belyi_open_le_finSub (X₀ : Scheme.{u}) [X₀.Over (Spec (.of F)
     exact mapOfAlgebra_preimage_opensRange_puncturedι K.1 Ω
   have hpt : ∀ y, P1.mapOfAlgebra K.1 Ω (fΩ y) = fK (πX y) := fun y ↦ by
     rw [← Scheme.Hom.comp_apply, hw, Scheme.Hom.comp_apply]
-  refine ⟨K, fK, hfKstr, inferInstance, fun x hx ↦ ?_, ?_, inferInstance, ?_⟩
+  refine ⟨S₀, K, fK, hS₀fin, hK₀, hfKstr, inferInstance, fun x hx ↦ ?_, ?_, inferInstance, ?_,
+    fun x hx ↦ ?_⟩
   · obtain ⟨y, rfl⟩ := πX.surjective x
     have hy : y ∈ fΩ ⁻¹ᵁ puncturedLine Ω := by
       rw [← hpre]
@@ -220,5 +234,29 @@ theorem exists_belyi_open_le_finSub (X₀ : Scheme.{u}) [X₀.Over (Spec (.of F)
   · refine of_morphismRestrict_of_isPullback @Etale hS0 (puncturedLine K.1) ?_
     rw [hpre]
     exact hWet
+  · obtain ⟨y, rfl⟩ := πX.surjective x
+    refine ⟨y, fun hy ↦ hx ?_, ?_⟩
+    · have hy' : y ∈ fΩ ⁻¹ᵁ (P1.mapOfAlgebra K.1 Ω ⁻¹ᵁ puncturedLine K.1) := by
+        rw [hpre]; exact hy
+      simp only [Scheme.Hom.mem_preimage] at hy' ⊢
+      rwa [← hpt]
+    · rw [← Scheme.Hom.comp_apply, hπsnd]
+
+/-- **[AbsTopII] Example 3.6 (i) over a finite extension of the field of definition.** Let `X₀`
+be a curve over a field `F` algebraic over `ℚ` (e.g. a number field), `U₀ ⊆ X₀` a nonempty open
+subscheme and `Ω` an algebraic closure of `F`. Then for some finite subextension `K` of `Ω / F`
+there is a finite morphism `f : X_K ⟶ ℙ¹_K` over `K` (`X_K = Spec K ×_F X₀`) such that
+`W = f⁻¹(ℙ¹_K ∖ {0, 1, ∞})` is a nonempty open subscheme of `U_K` and
+`f|_W : W ⟶ ℙ¹_K ∖ {0, 1, ∞}` is finite étale. -/
+theorem exists_belyi_open_le_finSub (X₀ : Scheme.{u}) [X₀.Over (Spec (.of F))]
+    [IsCurveOver F X₀] (U₀ : X₀.Opens) (hU₀ : (U₀ : Set X₀).Nonempty) :
+    ∃ (K : FinSub F Ω) (f : pullback (specAlgebraMap F K.1) (X₀ ↘ Spec (.of F)) ⟶ P1 K.1),
+      f ≫ (P1 K.1 ↘ Spec (.of K.1)) = pullback.fst _ _ ∧ IsFinite f ∧
+      f ⁻¹ᵁ puncturedLine K.1 ≤ pullback.snd (specAlgebraMap F K.1) (X₀ ↘ Spec (.of F)) ⁻¹ᵁ U₀ ∧
+      (SetLike.coe (f ⁻¹ᵁ puncturedLine K.1)).Nonempty ∧
+      IsFinite (f ∣_ puncturedLine K.1) ∧ Etale (f ∣_ puncturedLine K.1) := by
+  obtain ⟨-, K, f, -, -, h1, h2, h3, h4, h5, h6, -⟩ :=
+    exists_belyi_open_le_finSub_ge F Ω X₀ U₀ hU₀ fun _ ↦ Classical.arbitrary _
+  exact ⟨K, f, h1, h2, h3, h4, h5, h6⟩
 
 end Belyi.Anabelian

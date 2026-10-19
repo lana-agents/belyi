@@ -50,4 +50,27 @@ theorem exists_baseChange_model {Z : Scheme.{u}} (g : Z ⟶ Spec (.of k))
   · rw [Category.assoc, ← pullback.condition, ← Category.assoc, hψq]
     rfl
 
+/-- `exists_baseChange_model` with `K` above a prescribed finite subextension `K₀` (compose the
+model over `K` with the transition morphism `X_{K ⊔ K₀} ⟶ X_K`). -/
+theorem exists_baseChange_model_ge {Z : Scheme.{u}} (g : Z ⟶ Spec (.of k))
+    [LocallyOfFinitePresentation g]
+    (φ : Limits.pullback (Spec.map (CommRingCat.ofHom (algebraMap k Ω))) f ⟶ Z)
+    (hφ : φ ≫ g = pullback.snd _ f ≫ f) (K₀ : FinSub k Ω) :
+    ∃ (K : (FinSub k Ω)ᵒᵖ) (ψ : (baseChangeDiagram (Ω := Ω) f).obj K ⟶ Z), K₀ ≤ K.unop ∧
+      (baseChangeCone (Ω := Ω) f).π.app K ≫ ψ = φ ∧
+      ψ ≫ g = (baseChangeDiagramπ (Ω := Ω) f).app K ≫ f := by
+  obtain ⟨K, ψ, h1, h2⟩ := exists_baseChange_model f g φ hφ
+  haveI := K.unop.2
+  haveI := K₀.2
+  let L : FinSub k Ω := ⟨K.unop.1 ⊔ K₀.1, IntermediateField.finiteDimensional_sup _ _⟩
+  have hKL : K.unop ≤ L := (le_sup_left : K.unop.1 ≤ K.unop.1 ⊔ K₀.1)
+  have hK₀L : K₀ ≤ L := (le_sup_right : K₀.1 ≤ K.unop.1 ⊔ K₀.1)
+  let h : Opposite.op L ⟶ K := (homOfLE hKL).op
+  refine ⟨Opposite.op L, (baseChangeDiagram (Ω := Ω) f).map h ≫ ψ, hK₀L, ?_, ?_⟩
+  · exact ((Category.assoc _ _ _).symm.trans
+      (congrArg (· ≫ ψ) ((baseChangeCone (Ω := Ω) f).w h))).trans h1
+  · rw [Category.assoc, h2, ← Category.assoc, (baseChangeDiagramπ (Ω := Ω) f).naturality h]
+    simp only [Functor.const_obj_map]
+    exact congrArg (· ≫ f) (Category.comp_id _)
+
 end Belyi.Anabelian

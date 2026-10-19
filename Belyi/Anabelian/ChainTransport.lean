@@ -175,6 +175,12 @@ theorem InTorsionFreeNormalOpen.transport {A : ChainObj E} {C : Subgroup A.grp}
   rw [transport_Delta]
   exact h
 
+theorem transport_deltaNormalClosure (A : ChainObj E) (C : Subgroup A.grp) :
+    (A.transport Φ).deltaNormalClosure C = A.deltaNormalClosure C := by
+  unfold deltaNormalClosure
+  rw [transport_Delta]
+  rfl
+
 theorem Compat.transport {A B : ChainObj E} {φ : A.grp →ₜ* B.grp} (h : Compat A B φ) :
     Compat (A.transport Φ) (B.transport Φ) φ := by
   obtain ⟨H, hA, hB, hφ⟩ := h
@@ -192,7 +198,8 @@ def transport (Φ : E.Iso E') : ElemOp A B → ElemOp (A.transport Φ) (B.transp
   | cover φ inj isOpen compat => cover φ inj isOpen compat.transport
   | quot φ inj isOpen compat => quot φ inj isOpen compat.transport
   | decusp φ surj C cusp tf ker compat =>
-      decusp φ surj C cusp.transport tf.transport ker compat.transport
+      decusp φ surj C cusp.transport tf.transport
+        (by rw [ChainObj.transport_deltaNormalClosure]; exact ker) compat.transport
   | deorb φ surj F le finite ker compat =>
       deorb φ surj F (by rw [ChainObj.transport_Delta]; exact le) finite ker compat.transport
 
