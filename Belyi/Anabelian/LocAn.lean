@@ -62,7 +62,11 @@ Everything here is a genuine object:
 * `Belyi.Anabelian.HypCurve`, `HypCurve.GeomPt`, `HypCurve.KIso`, `HypCurve.KHom`;
 * `Belyi.Anabelian.IsOverGk`, `Belyi.Anabelian.IsPathOverBase`, `Belyi.Anabelian.InducedBy`,
   `Belyi.Anabelian.InducedByHom`;
-* `Belyi.Anabelian.RelIsomDGC`, `Belyi.Anabelian.RelHomDGC` (**whitelist: [LocAn] Thm A**).
+* `Belyi.Anabelian.RelIsomDGC`, `Belyi.Anabelian.RelHomDGC` (**whitelist: [LocAn] Thm A**);
+* `Belyi.Anabelian.RelIsomDGC.Exists`, `Belyi.Anabelian.RelIsomDGC.Unique`: the existence and
+  uniqueness halves, with `Belyi.Anabelian.relIsomDGC_iff_exists_and_unique`
+  (`RelIsomDGC k ↔ Exists k ∧ Unique k`). Consumers can take the two halves as separate inputs, so
+  that a proved uniqueness half (MR7) leaves only the existence half as a hypothesis.
 -/
 
 universe u
@@ -291,6 +295,55 @@ def RelIsomDGC (k : Type u) [Field k] [CharZero k] : Prop :=
     haveI := IsAlgClosure.isAlgClosed (R := k) (K := Ω)
     ∀ (C₁ C₂ : HypCurve k) (ξ₁ : GeomPt Ω C₁) (ξ₂ : GeomPt Ω C₂) (φ : π₁ᵉᵗ(ξ₁.x) ≃ₜ* π₁ᵉᵗ(ξ₂.x)),
     IsOverGk ξ₁ ξ₂ (φ : π₁ᵉᵗ(ξ₁.x) →ₜ* π₁ᵉᵗ(ξ₂.x)) → ∃! f : KIso C₁ C₂, InducedBy ξ₁ ξ₂ f φ
+
+open HypCurve in
+/-- **Existence half of the rel-isom-DGC over `k`**: every continuous isomorphism
+`Π_{U₁} ≃ Π_{U₂}` over `G_k` is induced (up to `Δ₂`-conjugation) by some `k`-isomorphism
+`U₁ ≅ U₂`. Together with `RelIsomDGC.Unique` it is equivalent to `RelIsomDGC`
+(`relIsomDGC_iff_exists_and_unique`). For sub-`p`-adic `k` this is the hard half of [LocAn]
+Theorem A (the MR7 track proves the two halves separately). -/
+def RelIsomDGC.Exists (k : Type u) [Field k] [CharZero k] : Prop :=
+  ∀ (Ω : Type u) [Field Ω] [Algebra k Ω] [IsAlgClosure k Ω],
+    haveI := IsAlgClosure.isAlgClosed (R := k) (K := Ω)
+    ∀ (C₁ C₂ : HypCurve k) (ξ₁ : GeomPt Ω C₁) (ξ₂ : GeomPt Ω C₂) (φ : π₁ᵉᵗ(ξ₁.x) ≃ₜ* π₁ᵉᵗ(ξ₂.x)),
+    IsOverGk ξ₁ ξ₂ (φ : π₁ᵉᵗ(ξ₁.x) →ₜ* π₁ᵉᵗ(ξ₂.x)) → ∃ f : KIso C₁ C₂, InducedBy ξ₁ ξ₂ f φ
+
+open HypCurve in
+/-- **Uniqueness half of the rel-isom-DGC over `k`**: two `k`-isomorphisms `U₁ ≅ U₂` inducing
+(up to `Δ₂`-conjugation) the same continuous isomorphism `Π_{U₁} ≃ Π_{U₂}` over `G_k` are equal
+([LocAn] Thm 14.1, injectivity paragraph, l.4019–4032). Together with `RelIsomDGC.Exists` it is
+equivalent to `RelIsomDGC` (`relIsomDGC_iff_exists_and_unique`). -/
+def RelIsomDGC.Unique (k : Type u) [Field k] [CharZero k] : Prop :=
+  ∀ (Ω : Type u) [Field Ω] [Algebra k Ω] [IsAlgClosure k Ω],
+    haveI := IsAlgClosure.isAlgClosed (R := k) (K := Ω)
+    ∀ (C₁ C₂ : HypCurve k) (ξ₁ : GeomPt Ω C₁) (ξ₂ : GeomPt Ω C₂) (φ : π₁ᵉᵗ(ξ₁.x) ≃ₜ* π₁ᵉᵗ(ξ₂.x)),
+    IsOverGk ξ₁ ξ₂ (φ : π₁ᵉᵗ(ξ₁.x) →ₜ* π₁ᵉᵗ(ξ₂.x)) →
+      ∀ f f' : KIso C₁ C₂, InducedBy ξ₁ ξ₂ f φ → InducedBy ξ₁ ξ₂ f' φ → f = f'
+
+/-- **The rel-isom-DGC splits into existence and uniqueness**:
+`RelIsomDGC k ↔ RelIsomDGC.Exists k ∧ RelIsomDGC.Unique k`. -/
+theorem relIsomDGC_iff_exists_and_unique (k : Type u) [Field k] [CharZero k] :
+    RelIsomDGC k ↔ RelIsomDGC.Exists k ∧ RelIsomDGC.Unique k := by
+  refine ⟨fun h ↦ ⟨fun Ω _ _ _ C₁ C₂ ξ₁ ξ₂ φ hφ ↦ (h Ω C₁ C₂ ξ₁ ξ₂ φ hφ).exists,
+    fun Ω _ _ _ C₁ C₂ ξ₁ ξ₂ φ hφ f f' hf hf' ↦ (h Ω C₁ C₂ ξ₁ ξ₂ φ hφ).unique hf hf'⟩,
+    fun ⟨hE, hU⟩ Ω _ _ _ C₁ C₂ ξ₁ ξ₂ φ hφ ↦ ?_⟩
+  obtain ⟨f, hf⟩ := hE Ω C₁ C₂ ξ₁ ξ₂ φ hφ
+  exact ⟨f, hf, fun f' hf' ↦ hU Ω C₁ C₂ ξ₁ ξ₂ φ hφ f' f hf' hf⟩
+
+/-- The rel-isom-DGC from its existence and uniqueness halves. -/
+theorem RelIsomDGC.of_exists_of_unique {k : Type u} [Field k] [CharZero k]
+    (hE : RelIsomDGC.Exists k) (hU : RelIsomDGC.Unique k) : RelIsomDGC k :=
+  (relIsomDGC_iff_exists_and_unique k).2 ⟨hE, hU⟩
+
+/-- The existence half of the rel-isom-DGC. -/
+theorem RelIsomDGC.exists_half {k : Type u} [Field k] [CharZero k] (h : RelIsomDGC k) :
+    RelIsomDGC.Exists k :=
+  ((relIsomDGC_iff_exists_and_unique k).1 h).1
+
+/-- The uniqueness half of the rel-isom-DGC. -/
+theorem RelIsomDGC.unique_half {k : Type u} [Field k] [CharZero k] (h : RelIsomDGC k) :
+    RelIsomDGC.Unique k :=
+  ((relIsomDGC_iff_exists_and_unique k).1 h).2
 
 open HypCurve in
 /-- **The rel-hom-DGC over `k`** ([AbsTopI] Definition 4.6 (ii), homomorphism version): every
